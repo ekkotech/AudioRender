@@ -1,24 +1,163 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+    <device id="retina3_5" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Root View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="RootViewController" customModule="AudioRender" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SplashBg" translatesAutoresizingMaskIntoConstraints="NO" id="cTo-18-6iJ">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
+                            </imageView>
+                            <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5Ox-sa-4iz">
+                                <rect key="frame" x="0.0" y="96" width="320" height="288"/>
+                                <connections>
+                                    <segue destination="V51-yD-sk1" kind="embed" id="QBP-nu-SM1"/>
+                                </connections>
+                            </containerView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ql2-C8-O2H">
+                                <rect key="frame" x="220" y="43" width="100" height="42"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="42" id="0pb-dU-WgX"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="gUw-cX-xrn"/>
+                                </constraints>
+                                <state key="normal" image="Note"/>
+                                <connections>
+                                    <action selector="handleLibraryButtonTouchUp:" destination="BYZ-38-t0r" eventType="touchUpInside" id="FEU-t0-fZD"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="WGm-BR-Xdh">
+                                <rect key="frame" x="0.0" y="43" width="100" height="42"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="42" id="GmM-4M-TEz"/>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="V43-wD-Bfs"/>
+                                </constraints>
+                                <state key="normal" image="Files"/>
+                                <connections>
+                                    <action selector="handleFileButtonTouchUp:" destination="BYZ-38-t0r" eventType="touchUpInside" id="UiX-HK-nmZ"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="cTo-18-6iJ" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="14e-Lr-FEG"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="5Ox-sa-4iz" secondAttribute="trailing" id="5ae-DL-6I5"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="cTo-18-6iJ" secondAttribute="trailing" id="CJ3-NR-cUA"/>
+                            <constraint firstItem="ql2-C8-O2H" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="WGm-BR-Xdh" secondAttribute="trailing" priority="900" constant="8" symbolic="YES" id="Egc-WE-X5O"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="5Ox-sa-4iz" secondAttribute="trailing" id="LX0-nm-Ucs"/>
+                            <constraint firstAttribute="bottom" secondItem="cTo-18-6iJ" secondAttribute="bottom" id="QQU-Pb-kay"/>
+                            <constraint firstItem="5Ox-sa-4iz" firstAttribute="top" secondItem="WGm-BR-Xdh" secondAttribute="bottom" constant="11" id="UJG-4X-JzJ"/>
+                            <constraint firstItem="WGm-BR-Xdh" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="UbY-4h-APR"/>
+                            <constraint firstItem="5Ox-sa-4iz" firstAttribute="top" secondItem="ql2-C8-O2H" secondAttribute="bottom" constant="11" id="ac2-KX-axz"/>
+                            <constraint firstItem="5Ox-sa-4iz" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="grq-Co-R3I"/>
+                            <constraint firstItem="ql2-C8-O2H" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="23" id="jcP-aP-46Y"/>
+                            <constraint firstItem="WGm-BR-Xdh" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="23" id="jyO-3L-77S"/>
+                            <constraint firstItem="5Ox-sa-4iz" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="kTF-Le-H9L"/>
+                            <constraint firstItem="cTo-18-6iJ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="lso-S2-XLp"/>
+                            <constraint firstItem="5Ox-sa-4iz" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="0.6" id="sup-4B-leB"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="ql2-C8-O2H" secondAttribute="trailing" id="zOa-bI-ndk"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
+                    <connections>
+                        <outlet property="containerView" destination="5Ox-sa-4iz" id="86B-Vu-l6l"/>
+                        <outlet property="filesButton" destination="WGm-BR-Xdh" id="kSv-jV-pEm"/>
+                        <outlet property="libraryButton" destination="ql2-C8-O2H" id="eDY-n2-0uD"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="-714.375" y="132.5"/>
+        </scene>
+        <!--Waveform View Container-->
+        <scene sceneID="3SU-uO-Y7B">
+            <objects>
+                <viewController id="V51-yD-sk1" customClass="WaveformViewContainer" customModule="AudioRender" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Bwg-t8-rNE">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="288"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rzi-cW-nwg" customClass="SliderView" customModule="AudioRender" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="86.5"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="U10-ix-rgH" customClass="ScrollerView" customModule="AudioRender" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="86.5" width="320" height="201.5"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstAttribute="trailing" secondItem="rzi-cW-nwg" secondAttribute="trailing" id="6r7-ks-65J"/>
+                            <constraint firstItem="U10-ix-rgH" firstAttribute="leading" secondItem="Bwg-t8-rNE" secondAttribute="leading" id="VMj-1p-S4Y"/>
+                            <constraint firstItem="U10-ix-rgH" firstAttribute="top" secondItem="rzi-cW-nwg" secondAttribute="bottom" id="eAd-Jg-hrg"/>
+                            <constraint firstAttribute="trailing" secondItem="U10-ix-rgH" secondAttribute="trailing" id="fGg-oa-0K4"/>
+                            <constraint firstItem="rzi-cW-nwg" firstAttribute="top" secondItem="Bwg-t8-rNE" secondAttribute="top" id="hCX-na-Ri2"/>
+                            <constraint firstAttribute="bottom" secondItem="U10-ix-rgH" secondAttribute="bottom" id="m0O-eR-KQM"/>
+                            <constraint firstItem="rzi-cW-nwg" firstAttribute="height" secondItem="Bwg-t8-rNE" secondAttribute="height" multiplier="0.3" id="mhT-SS-gR7"/>
+                            <constraint firstItem="rzi-cW-nwg" firstAttribute="leading" secondItem="Bwg-t8-rNE" secondAttribute="leading" id="vq5-Hu-P1e"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="rHn-Me-bgU"/>
+                    </view>
+                    <connections>
+                        <outlet property="scrollerView" destination="U10-ix-rgH" id="c5Q-hF-UbD"/>
+                        <outlet property="sliderView" destination="rzi-cW-nwg" id="ZxC-Ba-O4M"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="PXG-WZ-Ocq" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-714" y="850"/>
+        </scene>
+        <!--Table View Controller-->
+        <scene sceneID="yLm-My-p8z">
+            <objects>
+                <tableViewController storyboardIdentifier="fileListViewController" id="h7W-Dg-PTE" sceneMemberID="viewController">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="42V-fL-nlA">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <prototypes>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="fileDetail" id="KBY-cY-4uy">
+                                <rect key="frame" x="0.0" y="28" width="320" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="KBY-cY-4uy" id="Glx-KP-jMB">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="cancelCell" id="CeG-Ql-R03">
+                                <rect key="frame" x="0.0" y="72" width="320" height="44"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="CeG-Ql-R03" id="cSi-2Z-1fW">
+                                    <rect key="frame" x="0.0" y="0.0" width="320" height="43.5"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </tableViewCellContentView>
+                            </tableViewCell>
+                        </prototypes>
+                        <connections>
+                            <outlet property="dataSource" destination="h7W-Dg-PTE" id="FpP-UT-Uzq"/>
+                            <outlet property="delegate" destination="h7W-Dg-PTE" id="WNc-u9-6gN"/>
+                        </connections>
+                    </tableView>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1BV-54-baf" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="71" y="133"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Files" width="40" height="40"/>
+        <image name="Note" width="40" height="40"/>
+        <image name="SplashBg" width="300" height="600"/>
+    </resources>
 </document>
