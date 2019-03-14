@@ -20,12 +20,17 @@
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SplashBg" translatesAutoresizingMaskIntoConstraints="NO" id="ilV-Ci-wkS">
                                 <rect key="frame" x="0.0" y="20" width="375" height="647"/>
                             </imageView>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" image="Splash" translatesAutoresizingMaskIntoConstraints="NO" id="SNo-N8-Op8">
-                                <rect key="frame" x="67" y="213" width="240" height="240"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Splash" translatesAutoresizingMaskIntoConstraints="NO" id="SNo-N8-Op8">
+                                <rect key="frame" x="112.5" y="258.5" width="150" height="150"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="SNo-N8-Op8" secondAttribute="height" multiplier="1:1" priority="900" id="tVz-72-JbN"/>
+                                </constraints>
                             </imageView>
                         </subviews>
                         <constraints>
+                            <constraint firstItem="SNo-N8-Op8" firstAttribute="width" secondItem="ilV-Ci-wkS" secondAttribute="width" multiplier="0.4" id="Ao7-Kb-rPZ"/>
+                            <constraint firstItem="SNo-N8-Op8" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="Nsl-js-Jd6"/>
+                            <constraint firstItem="SNo-N8-Op8" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="PjV-fA-1am"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="ilV-Ci-wkS" secondAttribute="trailing" id="cEU-yz-itc"/>
                             <constraint firstItem="ilV-Ci-wkS" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="exG-KX-LNf"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="ilV-Ci-wkS" secondAttribute="bottom" id="fY8-Sw-Pga"/>
