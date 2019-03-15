@@ -14,9 +14,9 @@ import Accelerate
 // MARK: - Downsample strategies
 //
 enum DsStrategy:String {
-    case maxValue = "Max Value"
-    case avgValue = "Average Value"
-    case sampleValue = "Sample Value"
+    case maxValue       = "Max Value"
+    case avgValue       = "Average Value"
+    case sampleValue    = "Sample Value"
 }
 let strategy:DsStrategy = .maxValue
 

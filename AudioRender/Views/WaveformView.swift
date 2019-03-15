@@ -41,11 +41,11 @@ let kWaveformYScale         = CGFloat(0.9)
 // Rendering control
 //
 enum RenderConfig:String {
-    case basic = "Basic"          // Individual lines scaled and drawn sequentially
-    case transform = "Transform"      // Individual lines inserted into path, scaled by transform
-    case linkLines = "Link Lines"      // Joined lines inserted into path, scaled by transform
-    case fill = "Fill"           // Outline inserted into path, scaled by transform and filled
-    case mask = "Mask"           // Outine inserted into path, scaled by transform and masked
+    case basic = "Basic"            // Individual lines scaled and drawn sequentially
+    case transform = "Transform"    // Individual lines inserted into path, scaled by transform
+    case linkLines = "Link Lines"   // Joined lines inserted into path, scaled by transform
+    case fill = "Fill"              // Outline inserted into path, scaled by transform and filled
+    case mask = "Mask"              // Outine inserted into path, scaled by transform and masked
 }
 
 let renderConfig:RenderConfig   = .mask
@@ -53,12 +53,18 @@ let shouldNormalise             = false
 
 class WaveformView: UIView {
     
+    //
+    // MARK: - Private properties
+    //
     let cursorLayer = CAShapeLayer()
     let maskLayer = CAShapeLayer()
     let waveformLayer = CAShapeLayer()
     let gradientLayer = CAGradientLayer()
     let layerDelegate = WaveformViewLayerDelegate()
     
+    //
+    // MARK: - Public properties
+    //
     public var sampleBuffer:SampleBuffer? = nil
     
     //
