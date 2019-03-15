@@ -32,24 +32,6 @@ class SampleBuffer: NSObject {
         get { return _capacity }
     }
     
-    var maximum:Float {
-        get { _extrema = 0.0
-            if let sb = _sBuff {
-                vDSP_maxv(sb, 1, &_extrema, vDSP_Length(_length))
-            }
-            return _extrema
-        }
-    }
-    
-    var minimum:Float {
-        get { _extrema = 0.0
-            if let sb = _sBuff {
-                vDSP_minv(sb, 1, &_extrema, vDSP_Length(_length))
-            }
-            return _extrema
-        }
-    }
-    
     var peak:Float {
         get { return _peak }
         set { _peak = newValue }
@@ -73,10 +55,15 @@ class SampleBuffer: NSObject {
         _length += xferCount
     }
     
-    func normalise() {
-        guard let sb = _sBuff else { return }
-        var scale:Float = 1.0 / maximum
-        vDSP_vsmul(sb, 1, &scale, sb, 1, vDSP_Length(_length))
+    func updatePeak() -> Float {
+
+        if let sb = _sBuff {
+            vDSP_maxv(sb, 1, &_extrema, vDSP_Length(_length))
+            _peak = _extrema != 0.0 ? _extrema : 1.0
+            return _peak
+        }
+        
+        return 1.0
     }
     
     deinit {

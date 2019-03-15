@@ -72,11 +72,13 @@ class WaveformViewContainer: UIViewController, SampleRequestProtocol {
     func getSamples(initialRender:Bool, startFrame:AVAudioFramePosition, numOutFrames:AVAudioFrameCount, dsFactor:Int, clientRef:Int, samplesCB:@escaping(SampleBuffer)->()) {
         
         func samplesReturned(sBuff:SampleBuffer) {
-            samplesCB(sBuff)
             if initialRender {
+                // Update peak values
+                sampler.peak = sBuff.updatePeak()
                 // Render scroller
                 onRenderInitialWaveform.fire(.scroller)
             }
+            samplesCB(sBuff)
         }
         
         requestQueue.async {

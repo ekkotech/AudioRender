@@ -49,7 +49,7 @@ enum RenderConfig:String {
 }
 
 let renderConfig:RenderConfig   = .mask
-let shouldNormalise             = false
+let shouldNormalise             = true
 
 class WaveformView: UIView {
     

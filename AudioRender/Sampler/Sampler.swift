@@ -39,7 +39,7 @@ class Sampler: NSObject {
     private var assetURL:URL? = nil
     private var processingFormat:AVAudioFormat? = nil
     private var audioFile:AVAudioFile? = nil
-    private var peak:Float = 0.0
+    private var _peak:Float = 1.0
     private let ripFileGroup:DispatchGroup = DispatchGroup.init()
     private let readerQueue:DispatchQueue = DispatchQueue.init(label: "readerQ", qos: .userInitiated, attributes: .concurrent)
     private let dsConcQueue:DispatchQueue = DispatchQueue.init(label: "dsConQ", qos: .userInitiated, attributes: .concurrent)
@@ -50,6 +50,11 @@ class Sampler: NSObject {
     //
     // MARK: - Public API
     //
+    
+    var peak:Float {
+        get { return _peak}
+        set { _peak = newValue != 0.0 ? newValue : 1.0 }
+    }
     
     /**
      Initialises a new asset
@@ -203,6 +208,7 @@ class Sampler: NSObject {
         // Allocate sample buffer large enough for downsampled frames
         let thisOutFrames = assetLength / UInt32(dsFactor)
         let sBuff = SampleBuffer.init(capacity: thisOutFrames)
+        if let sb = sBuff { sb.peak = _peak }
         
         guard let pf = processingFormat, let sb = sBuff, let sbfd = sb.floatData else { completion(nil); return }
         
@@ -239,13 +245,14 @@ class Sampler: NSObject {
         
         if let pcmb = AVAudioPCMBuffer.init(pcmFormat: pf, frameCapacity: numOutFrames * UInt32(dsFactor)), let sBuff = SampleBuffer.init(capacity: numOutFrames) {
             
+            sBuff.peak = _peak
             do {
                 let readFileStartTime = CACurrentMediaTime()
                 try af.read(into: pcmb, frameCount: numOutFrames * UInt32(dsFactor))
                 timeStats.setTimeParameter(index: index, key: "fileread", timing: (comment: "", start: readFileStartTime, end: CACurrentMediaTime()))
                 downsample(frameBuffer: pcmb, dsFactor: dsFactor)
                 merge(frameBuffer: pcmb, sampleBuffer: sBuff)
-                normalise(sampleBuffer: sBuff)
+//                normalise(sampleBuffer: sBuff)
                 completion(sBuff)
             }
             catch {
