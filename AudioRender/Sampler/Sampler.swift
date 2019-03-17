@@ -253,6 +253,7 @@ class Sampler: NSObject {
                 downsample(frameBuffer: pcmb, dsFactor: dsFactor)
                 merge(frameBuffer: pcmb, sampleBuffer: sBuff)
 //                normalise(sampleBuffer: sBuff)
+                buildPath(sampleBuffer: sBuff)
                 completion(sBuff)
             }
             catch {
@@ -382,6 +383,38 @@ class Sampler: NSObject {
                 vDSP_vsmul(sbfd, 1, &scale, sbfd, 1, vDSP_Length(sampleBuffer.frameLength))
             }
         }
+    }
+    
+    private func buildPath(sampleBuffer: SampleBuffer) {
+        guard let fd = sampleBuffer.floatData, sampleBuffer.frameLength > 0 else { return }
+        
+        var ptArray = Array<CGPoint>.init(repeating: CGPoint(x: 0.0, y: 0.0), count: Int(sampleBuffer.frameLength) * 2)
+
+        switch useAccel {
+        case false:
+            measure(name: "Build path") {
+                for idx in 0..<Int(sampleBuffer.frameLength) {
+                    ptArray[idx].x = CGFloat(idx)
+                    ptArray[idx].y = CGFloat(fd[idx])
+                    ptArray[(ptArray.count - 1) - idx] = ptArray[idx]
+                }
+            }
+         case true:
+            measure(name: "Build path (AF)") {
+                ptArray.withUnsafeMutableBufferPointer { buffer in
+                    guard let bp = buffer.baseAddress else { return }
+                    
+                    let doublesPtr = UnsafeMutableRawPointer(bp).bindMemory(to: Double.self, capacity: Int(sampleBuffer.frameLength) * 2)
+                    var startValue:Double = 0.0
+                    var incrBy:Double = 1.0
+                    vDSP_vrampD(&startValue, &incrBy, doublesPtr, 2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vrampD(&startValue, &incrBy, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 2, -2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vspdp(fd, 1, doublesPtr + 1, 2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vspdp(fd, 1, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 1, -2, vDSP_Length(sampleBuffer.frameLength))
+                }
+            }
+        }
+        sampleBuffer.points = ptArray
     }
     
 }

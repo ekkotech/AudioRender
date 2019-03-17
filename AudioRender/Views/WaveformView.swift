@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Accelerate
 
 //
 // Compression (downsample factor)
@@ -48,8 +49,8 @@ enum RenderConfig:String {
     case mask = "Mask"              // Outine inserted into path, scaled by transform and masked
 }
 
-let renderConfig:RenderConfig   = .mask
-let shouldNormalise             = true
+let renderConfig:RenderConfig   = .linkLines
+let shouldNormalise             = false
 
 class WaveformView: UIView {
     
@@ -180,13 +181,17 @@ extension WaveformViewLayerDelegate {
                 let yTranslation:CGFloat = layer.bounds.height / 2
                 let xScale = layer.bounds.size.width / CGFloat(sb.frameLength)
                 let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformYScale
-                
+                timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 for idx in 0..<Int(sb.frameLength) {
                     let xLocation = CGFloat(xScale * CGFloat(idx))
                     let yOffset = (CGFloat(sbfd[idx]) * yScale)
                     
                     ctx.move(to: CGPoint(x: xLocation, y: yTranslation - yOffset))
                     ctx.addLine(to: CGPoint(x: xLocation, y: yTranslation + yOffset))
+//                    ctx.strokePath()
+                }
+                }
+                timing(index: index, key: "draw", comment: "", stats: timeStats) {
                     ctx.strokePath()
                 }
             }
@@ -258,11 +263,15 @@ extension WaveformViewLayerDelegate {
     private func doTransform(sBuff:SampleBuffer, bounds:CGRect, lines:UIBezierPath) {
         guard sBuff.frameLength > 0 else { return }
         
+        //
+        // Insert affine transform code here
+        //
         let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sBuff.peak)) : kWaveformYScale
         var tf = CGAffineTransform.identity
         tf = tf.translatedBy(x: 0.0, y: bounds.height / 2)
         tf = tf.scaledBy(x: bounds.width / CGFloat(sBuff.frameLength), y: (bounds.height / 2) * yScale)
         lines.apply(tf)
+
     }
     
     private func doStroke(ctx:CGContext, lines:UIBezierPath) {
@@ -278,3 +287,18 @@ extension WaveformViewLayerDelegate {
     }
     
 }
+
+/*
+ // Affine transform code
+ let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sBuff.peak)) : kWaveformYScale
+ var tf = CGAffineTransform.identity
+ tf = tf.translatedBy(x: 0.0, y: bounds.height / 2)
+ tf = tf.scaledBy(x: bounds.width / CGFloat(sBuff.frameLength), y: (bounds.height / 2) * yScale)
+ lines.apply(tf)
+
+ //
+ 
+ 
+ 
+ 
+ */

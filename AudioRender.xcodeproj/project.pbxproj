@@ -50,6 +50,8 @@
 		D14FB34222377EE00042C4B3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB2D9223779000042C4B3 /* AppDelegate.swift */; };
 		D14FB34322377EE50042C4B3 /* AppConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB30C22377A790042C4B3 /* AppConstants.swift */; };
 		D14FB34422377EEC0042C4B3 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB2DB223779000042C4B3 /* RootViewController.swift */; };
+		D1568745223CAF5300FAB8A0 /* CGPathInjector.m in Sources */ = {isa = PBXBuildFile; fileRef = D1568744223CAF5300FAB8A0 /* CGPathInjector.m */; };
+		D1568746223CAF5300FAB8A0 /* CGPathInjector.m in Sources */ = {isa = PBXBuildFile; fileRef = D1568744223CAF5300FAB8A0 /* CGPathInjector.m */; };
 		D16B76562238B24D00953FC7 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D16B76552238B24D00953FC7 /* Statistics.swift */; };
 		D16B76572238B24D00953FC7 /* Statistics.swift in Sources */ = {isa = PBXBuildFile; fileRef = D16B76552238B24D00953FC7 /* Statistics.swift */; };
 /* End PBXBuildFile section */
@@ -104,6 +106,8 @@
 		D14FB33722377D770042C4B3 /* SampleBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleBuffer.swift; sourceTree = "<group>"; };
 		D14FB33A22377DA80042C4B3 /* Sampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sampler.swift; sourceTree = "<group>"; };
 		D14FB33D22377DC50042C4B3 /* Signal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Signal.swift; sourceTree = "<group>"; };
+		D1568744223CAF5300FAB8A0 /* CGPathInjector.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CGPathInjector.m; sourceTree = "<group>"; };
+		D1568747223CAF7500FAB8A0 /* CGPathInjector.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CGPathInjector.h; sourceTree = "<group>"; };
 		D16B76552238B24D00953FC7 /* Statistics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Statistics.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -219,6 +223,8 @@
 				D14FB32F22377CE70042C4B3 /* AudioRenderTests-Bridging-Header.h */,
 				D14FB33D22377DC50042C4B3 /* Signal.swift */,
 				D16B76552238B24D00953FC7 /* Statistics.swift */,
+				D1568744223CAF5300FAB8A0 /* CGPathInjector.m */,
+				D1568747223CAF7500FAB8A0 /* CGPathInjector.h */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -402,6 +408,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1568745223CAF5300FAB8A0 /* CGPathInjector.m in Sources */,
 				D14FB2DC223779000042C4B3 /* RootViewController.swift in Sources */,
 				D14FB33E22377DC50042C4B3 /* Signal.swift in Sources */,
 				D14FB33822377D770042C4B3 /* SampleBuffer.swift in Sources */,
@@ -428,6 +435,7 @@
 				D14FB33F22377DC50042C4B3 /* Signal.swift in Sources */,
 				D14FB33522377D3D0042C4B3 /* Extensions.swift in Sources */,
 				D14FB32922377BDA0042C4B3 /* Logger.swift in Sources */,
+				D1568746223CAF5300FAB8A0 /* CGPathInjector.m in Sources */,
 				D14FB32D22377C3D0042C4B3 /* AudioSessionPatch.m in Sources */,
 				D14FB34422377EEC0042C4B3 /* RootViewController.swift in Sources */,
 				D16B76572238B24D00953FC7 /* Statistics.swift in Sources */,

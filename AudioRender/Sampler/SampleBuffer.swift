@@ -14,6 +14,7 @@ import Accelerate
 class SampleBuffer: NSObject {
     
     private let _sBuff:UnsafeMutablePointer<Float>?
+    private var _points:Array<CGPoint> = []
     private var _capacity:AVAudioFrameCount = 0
     private var _length:AVAudioFrameCount = 0
     private var _extrema:Float = 0.0
@@ -35,6 +36,11 @@ class SampleBuffer: NSObject {
     var peak:Float {
         get { return _peak }
         set { _peak = newValue }
+    }
+    
+    var points:Array<CGPoint> {
+        get { return _points }
+        set { _points = newValue }
     }
     
     init?(capacity:AVAudioFrameCount) {
