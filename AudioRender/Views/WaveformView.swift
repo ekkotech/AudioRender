@@ -17,7 +17,7 @@ let kDsFactorSlider             = 4096
 let kDsFactorScrollerInitial    = 512
 let kDsFactorUnspecified        = -1
 let kDsFactorDefault            = kDsFactorSlider
-let kDsFactorMaximum            = false
+let kDsFactorMaximum            = true
 
 //
 // Layer Names
@@ -45,11 +45,12 @@ enum RenderConfig:String {
     case basic = "Basic"            // Individual lines scaled and drawn sequentially
     case transform = "Transform"    // Individual lines inserted into path, scaled by transform
     case linkLines = "Link Lines"   // Joined lines inserted into path, scaled by transform
+    case outline = "Outline"        // Outline inserted into path, scaled by transform
     case fill = "Fill"              // Outline inserted into path, scaled by transform and filled
-    case mask = "Mask"              // Outine inserted into path, scaled by transform and masked
+    case mask = "Mask"              // Outline inserted into path, scaled by transform and masked
 }
 
-let renderConfig:RenderConfig   = .linkLines
+let renderConfig:RenderConfig   = .mask
 let shouldNormalise             = false
 
 class WaveformView: UIView {
@@ -99,7 +100,7 @@ class WaveformView: UIView {
 // MARK: - Layer Delegate
 //
 class WaveformViewLayerDelegate: NSObject, CALayerDelegate {
-    
+
     public var parentView:WaveformView? = nil
     
     func draw(_ layer: CALayer, in ctx: CGContext) {
@@ -139,36 +140,29 @@ extension WaveformViewLayerDelegate {
     func renderWithMask(layer: CALayer, in ctx: CGContext, parentView: WaveformView?) {
         
         guard let pv = parentView, let mask = layer.mask as? CAShapeLayer, let sb = pv.sampleBuffer else { return }
-        guard let sfd = sb.floatData, sb.frameLength > 0 else { return }
+        guard sb.frameLength > 0 else { return }
 
         let index = pv is SliderView ? 0 : 1
-        let lines = UIBezierPath()
-        
+        let path = CGMutablePath()
+        let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+        let tf = CGAffineTransform.init(offsetX: CGFloat(0.0),
+                                        offsetY: layer.bounds.height / 2,
+                                        scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
+                                        scaleY: (layer.bounds.height / 2) * yScale)
 
         timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
-            lines.move(to: CGPoint(x: 0.0, y: 0.0))
-            for idx in 0..<Int(sb.frameLength) {
-                lines.addLine(to: CGPoint(x: CGFloat(idx), y: CGFloat(sfd[idx])))
-            }
-            
-            for idx in (0..<Int(sb.frameLength)).reversed() {
-                lines.addLine(to: CGPoint(x: CGFloat(idx), y: CGFloat(-sfd[idx])))
-            }
-            lines.close()
+            path.addLines(between: sb.points, transform: tf)
+            path.closeSubpath()
         }
-
-        timing(index: index, key: "transform", comment: "", stats: timeStats) {
-            doTransform(sBuff: sb, bounds: layer.bounds, lines: lines)
-        }
-
+        
         timing(index: index, key: "draw", comment: "", stats: timeStats) {
-            mask.path = lines.cgPath
+            mask.path = path
         }
     }
     
     func renderWaveform(layer: CALayer, in ctx: CGContext, parentView: WaveformView?) {
         
-        guard let pv = parentView, let sb = pv.sampleBuffer, let sbfd = sb.floatData, sb.frameLength > 0 else { return }
+        guard let pv = parentView, let sb = pv.sampleBuffer, sb.frameLength > 0 else { return }
         
         let index = pv is SliderView ? 0 : 1
 
@@ -177,101 +171,115 @@ extension WaveformViewLayerDelegate {
         ctx.setLineWidth(kLineWidth)
         
         if renderConfig == .basic {
-            timing(index: index, key: "render", comment: "", stats: timeStats) {
+            // Render using points array...
+            // For "basic" rendering, only the first half of the points buffer is required
+            guard sb.points.count > 0 else { return }
+
+            let path = CGMutablePath()
+
+            timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 let yTranslation:CGFloat = layer.bounds.height / 2
                 let xScale = layer.bounds.size.width / CGFloat(sb.frameLength)
                 let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformYScale
-                timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
-                for idx in 0..<Int(sb.frameLength) {
-                    let xLocation = CGFloat(xScale * CGFloat(idx))
-                    let yOffset = (CGFloat(sbfd[idx]) * yScale)
-                    
-                    ctx.move(to: CGPoint(x: xLocation, y: yTranslation - yOffset))
-                    ctx.addLine(to: CGPoint(x: xLocation, y: yTranslation + yOffset))
-//                    ctx.strokePath()
+                
+                for idx in 0..<sb.points.count / 2 {
+                    let xScaled = CGFloat(xScale * CGFloat(idx))
+                    let yScaled = CGFloat(yScale * sb.points[idx].y)
+                    path.move(to: CGPoint(x: xScaled, y: yTranslation - yScaled))
+                    path.addLine(to: CGPoint(x: xScaled, y: yTranslation + yScaled))
                 }
-                }
-                timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                    ctx.strokePath()
-                }
+            }
+            
+            timing(index: index, key: "draw", comment: "", stats: timeStats) {
+                doStrokeWithPath(ctx: ctx, path: path)
             }
         }
         else if renderConfig == .transform {
-            let lines = UIBezierPath()
-
+            guard sb.points.count > 0 else { return }
+            
+            let path = CGMutablePath()
+            //
+            // Insert transform code here
+            //
+            var tf = CGAffineTransform.identity
+            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+            tf = tf.translatedBy(x: 0.0, y: layer.bounds.height / 2)
+            tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
+            
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
-                for idx in 0..<Int(sb.frameLength) {
-                    lines.move(to: CGPoint(x: CGFloat(idx), y: CGFloat(sbfd[idx])))
-                    lines.addLine(to: CGPoint(x: CGFloat(idx), y: CGFloat(-sbfd[idx])))
+                for idx in 0..<sb.points.count / 2 {
+                    path.move(to: CGPoint(x: CGFloat(idx), y: sb.points[idx].y), transform: tf)
+                    path.addLine(to: CGPoint(x: CGFloat(idx), y: -sb.points[idx].y), transform: tf)
                 }
             }
             
-            timing(index: index, key: "transform", comment: "", stats: timeStats) {
-                doTransform(sBuff: sb, bounds: layer.bounds, lines: lines)
-            }
-            
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStroke(ctx: ctx, lines: lines)
+                doStrokeWithPath(ctx: ctx, path: path)
             }
+
         }
         else if renderConfig == .linkLines {
-            let lines = UIBezierPath()
+            guard sb.points.count > 0 else { return }
+            
+            let path = CGMutablePath()
+            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+            let tf = CGAffineTransform(offsetX: CGFloat(0.0),
+                                       offsetY: layer.bounds.height / 2,
+                                       scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
+                                       scaleY: (layer.bounds.height / 2) * yScale)
+            
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
-                lines.move(to: CGPoint(x: 0.0, y: 0.0))
-                for idx in 0..<Int(sb.frameLength) {
+                path.move(to: CGPoint(x: 0.0, y: 0.0))
+                for idx in 0..<sb.points.count / 2 {
                     let modifier = idx % 2 == 0 ? 1 : -1
-                    lines.addLine(to: CGPoint(x: CGFloat(idx), y: CGFloat(sbfd[idx]) * CGFloat(modifier)))
-                    lines.addLine(to: CGPoint(x: CGFloat(idx), y: CGFloat(sbfd[idx]) * CGFloat(-modifier)))
+                    path.addLine(to: CGPoint(x: CGFloat(idx), y: sb.points[idx].y * CGFloat(modifier)), transform: tf)
+                    path.addLine(to: CGPoint(x: CGFloat(idx), y: sb.points[idx].y * CGFloat(-modifier)), transform: tf)
                 }
             }
             
-            timing(index: index, key: "transform", comment: "", stats: timeStats) {
-                doTransform(sBuff: sb, bounds: layer.bounds, lines: lines)
+            timing(index: index, key: "draw", comment: "", stats: timeStats) {
+                doStrokeWithPath(ctx: ctx, path: path)
+            }
+
+        }
+        else if renderConfig == .outline {
+            guard sb.points.count > 0 else { return }
+            
+            let path = CGMutablePath()
+            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+            let tf = CGAffineTransform(offsetX: CGFloat(0.0),
+                                       offsetY: layer.bounds.height / 2,
+                                       scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
+                                       scaleY: (layer.bounds.height / 2) * yScale)
+            
+            timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
+                path.addLines(between: sb.points, transform: tf)
             }
 
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStroke(ctx: ctx, lines: lines)
+                doStrokeWithPath(ctx: ctx, path: path)
             }
+
         }
         else if renderConfig == .fill {
-            let lines = UIBezierPath()
+            guard sb.points.count > 0 else { return }
+            
+            let path = CGMutablePath()
+            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+            let tf = CGAffineTransform.init(offsetX: CGFloat(0.0),
+                                            offsetY: layer.bounds.height / 2,
+                                            scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
+                                            scaleY: (layer.bounds.height / 2) * yScale)
 
-            print("Hello with index: \(index)")
-            
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
-                lines.move(to: CGPoint(x: 0.0, y: 0.0))
-                for idx in 0..<Int(sb.frameLength) {
-                    lines.addLine(to: CGPoint(x: CGFloat(idx), y: CGFloat(sbfd[idx])))
-                }
-                
-                for idx in (0..<Int(sb.frameLength)).reversed() {
-                    lines.addLine(to: CGPoint(x: CGFloat(idx), y: CGFloat(-sbfd[idx])))
-                }
-                lines.close()
-            }
-            
-            timing(index: index, key: "transform", comment: "", stats: timeStats) {
-                doTransform(sBuff: sb, bounds: layer.bounds, lines: lines)
+                path.addLines(between: sb.points, transform: tf)
+                path.closeSubpath()
             }
             
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doFill(ctx: ctx, lines: lines)
+                doFillWithCGPath(ctx: ctx, path: path)
             }
         }
-    }
-    
-    private func doTransform(sBuff:SampleBuffer, bounds:CGRect, lines:UIBezierPath) {
-        guard sBuff.frameLength > 0 else { return }
-        
-        //
-        // Insert affine transform code here
-        //
-        let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sBuff.peak)) : kWaveformYScale
-        var tf = CGAffineTransform.identity
-        tf = tf.translatedBy(x: 0.0, y: bounds.height / 2)
-        tf = tf.scaledBy(x: bounds.width / CGFloat(sBuff.frameLength), y: (bounds.height / 2) * yScale)
-        lines.apply(tf)
-
     }
     
     private func doStroke(ctx:CGContext, lines:UIBezierPath) {
@@ -280,9 +288,21 @@ extension WaveformViewLayerDelegate {
         ctx.strokePath()
     }
     
+    private func doStrokeWithPath(ctx:CGContext, path:CGMutablePath) {
+        ctx.beginPath()
+        ctx.addPath(path)
+        ctx.strokePath()
+    }
+    
     private func doFill(ctx:CGContext, lines:UIBezierPath) {
         ctx.beginPath()
         ctx.addPath(lines.cgPath)
+        ctx.fillPath()
+    }
+    
+    private func doFillWithCGPath(ctx:CGContext, path:CGMutablePath) {
+        ctx.beginPath()
+        ctx.addPath(path)
         ctx.fillPath()
     }
     

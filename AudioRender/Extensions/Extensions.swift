@@ -21,6 +21,19 @@ extension UIColor {
     
 }
 
+//
+// CGAffineTransform extensions
+//
+extension CGAffineTransform {
+    
+    init(offsetX:CGFloat, offsetY:CGFloat, scaleX:CGFloat, scaleY:CGFloat) {
+        self.init(scaleX: scaleX, y: scaleY)
+        self.tx = offsetX
+        self.ty = offsetY
+    }
+    
+}
+
 @discardableResult
 func measure<A>(name: String = "", _ block: () -> A) -> A {
     let startTime = CACurrentMediaTime()

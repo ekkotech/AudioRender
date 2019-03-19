@@ -23,7 +23,7 @@ let strategy:DsStrategy = .maxValue
 //
 // MARK: - Accelerate Framework selection
 //
-let useAccel = true
+let useAccel = false
 
 //
 // Multi-reader
@@ -118,14 +118,14 @@ class Sampler: NSObject {
             }
             else {
                 // Downsample entire file sync
-                timing(index: index, key: "total", comment: "", stats: timeStats) {
+                timing(index: index, key: "total", comment: "Ds: \(String(thisDsFactor))", stats: timeStats) {
                     downsampleSync(sourceFile: af, startFrame: 0, numOutFrames: thisNumOutFrames, dsFactor: thisDsFactor, completion: returnSamples)
                 }
             }
         }
         else {
             // Downsample file segment sync
-            timing(index: index, key: "total", comment: "", stats: timeStats) {
+            timing(index: index, key: "total", comment: "Ds: \(String(dsFactor))", stats: timeStats) {
                 downsampleSync(sourceFile: af, startFrame: thisStartFrame, numOutFrames: numOutFrames, dsFactor: dsFactor, completion: returnSamples)
             }
         }
@@ -231,7 +231,7 @@ class Sampler: NSObject {
             var peak:Float = 1.0
             vDSP_maxv(sbfd, 1, &peak, vDSP_Length(sb.frameLength))
             sb.peak = peak
-            print("Async file duration: \(CACurrentMediaTime() - ripStartTime)")
+            print("Async file duration: Ds: \(String(dsFactor)) \(CACurrentMediaTime() - ripStartTime)")
             completion(sb)
         })
         
@@ -392,15 +392,16 @@ class Sampler: NSObject {
 
         switch useAccel {
         case false:
-            measure(name: "Build path") {
+            timing(index: index, key: "buildpoints", comment: "", stats: timeStats) {
                 for idx in 0..<Int(sampleBuffer.frameLength) {
                     ptArray[idx].x = CGFloat(idx)
                     ptArray[idx].y = CGFloat(fd[idx])
                     ptArray[(ptArray.count - 1) - idx] = ptArray[idx]
+                    ptArray[(ptArray.count - 1) - idx].y *= -1.0
                 }
             }
          case true:
-            measure(name: "Build path (AF)") {
+            timing(index: index, key: "buildpoints", comment: "", stats: timeStats) {
                 ptArray.withUnsafeMutableBufferPointer { buffer in
                     guard let bp = buffer.baseAddress else { return }
                     
@@ -410,6 +411,7 @@ class Sampler: NSObject {
                     vDSP_vrampD(&startValue, &incrBy, doublesPtr, 2, vDSP_Length(sampleBuffer.frameLength))
                     vDSP_vrampD(&startValue, &incrBy, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 2, -2, vDSP_Length(sampleBuffer.frameLength))
                     vDSP_vspdp(fd, 1, doublesPtr + 1, 2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vneg(fd, 1, fd, 1, vDSP_Length(sampleBuffer.frameLength))
                     vDSP_vspdp(fd, 1, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 1, -2, vDSP_Length(sampleBuffer.frameLength))
                 }
             }

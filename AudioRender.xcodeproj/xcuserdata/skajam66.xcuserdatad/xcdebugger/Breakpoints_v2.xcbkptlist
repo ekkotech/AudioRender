@@ -10,13 +10,61 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "AudioRender/ViewControllers/WaveformViewContainer.swift"
-            timestampString = "574396951.985654"
+            timestampString = "574656356.325343"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "79"
             endingLineNumber = "79"
             landmarkName = "samplesReturned(sBuff:)"
             landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AudioRender/Views/WaveformView.swift"
+            timestampString = "574656356.325724"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "261"
+            endingLineNumber = "261"
+            landmarkName = "renderWaveform(layer:in:parentView:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "AudioRender.WaveformViewLayerDelegate.renderWaveform(layer: __C.CALayer, in: __C.CGContextRef, parentView: Swift.Optional&lt;AudioRender.WaveformView&gt;) -&gt; ()"
+                  moduleName = "AudioRender"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/skajam66/OneDrive%20-%20ekko-tech.com/Projects/TrySwift2019/AudioRender/AudioRender/Views/WaveformView.swift"
+                  timestampString = "574568094.922881"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "252"
+                  endingLineNumber = "252"
+                  offsetFromSymbolStart = "2560">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #4 () -&gt; () in AudioRender.WaveformViewLayerDelegate.renderWaveform(layer: __C.CALayer, in: __C.CGContextRef, parentView: Swift.Optional&lt;AudioRender.WaveformView&gt;) -&gt; ()"
+                  moduleName = "AudioRender"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/skajam66/OneDrive%20-%20ekko-tech.com/Projects/TrySwift2019/AudioRender/AudioRender/Views/WaveformView.swift"
+                  timestampString = "574568094.924899"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "253"
+                  endingLineNumber = "253"
+                  offsetFromSymbolStart = "60">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
