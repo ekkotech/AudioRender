@@ -23,7 +23,10 @@ let strategy:DsStrategy = .maxValue
 //
 // MARK: - Accelerate Framework selection
 //
-let useAccel = false
+let useAccelForDs = false
+let useAccelForMerge = false
+let useAccelForNormalise = false
+let useAccelForBuildPoints = false
 
 //
 // Multi-reader
@@ -32,7 +35,7 @@ let useMultiReader                = false
 // Make sure that the block size is an integer multiple of default downsample factor
 // Ideally, both should be powers of 2
 let kBlockSize                  = AVAudioFrameCount(524288)     // 2**19
-let kNumReaders                 = 2
+let kNumReaders                 = 1
 
 class Sampler: NSObject {
     
@@ -132,7 +135,7 @@ class Sampler: NSObject {
     }
     
     //
-    // MARK: - Donwsampling functions
+    // MARK: - Downsampling functions
     //
     private func downsampleAsync(assetURL:URL, assetLength:AVAudioFrameCount, startFrame:AVAudioFramePosition, dsFactor:Int, numReaders:Int, completion:@escaping(SampleBuffer?)->()) {
         
@@ -231,6 +234,7 @@ class Sampler: NSObject {
             var peak:Float = 1.0
             vDSP_maxv(sbfd, 1, &peak, vDSP_Length(sb.frameLength))
             sb.peak = peak
+            self.buildPointArray(sampleBuffer: sb)
             print("Async file duration: Ds: \(String(dsFactor)) \(CACurrentMediaTime() - ripStartTime)")
             completion(sb)
         })
@@ -238,7 +242,6 @@ class Sampler: NSObject {
     }
     
     private func downsampleSync(sourceFile:AVAudioFile, startFrame:AVAudioFramePosition, numOutFrames:AVAudioFrameCount, dsFactor:Int, completion:@escaping(SampleBuffer?)->()) {
-        
         guard let af = audioFile, let pf = processingFormat else { return }
         
         af.framePosition = startFrame
@@ -253,7 +256,7 @@ class Sampler: NSObject {
                 downsample(frameBuffer: pcmb, dsFactor: dsFactor)
                 merge(frameBuffer: pcmb, sampleBuffer: sBuff)
 //                normalise(sampleBuffer: sBuff)
-                buildPath(sampleBuffer: sBuff)
+                buildPointArray(sampleBuffer: sBuff)
                 completion(sBuff)
             }
             catch {
@@ -269,29 +272,7 @@ class Sampler: NSObject {
     private func downsample(frameBuffer:AVAudioPCMBuffer, dsFactor:Int) {
         guard let fcd = frameBuffer.floatChannelData else { return }
 
-        switch (strategy, useAccel) {
-        case (.avgValue, false):
-            timing(index: index, key: "downsample", comment: "", stats: timeStats) {
-                var leftAvgValue:Float
-                var rightAvgValue:Float
-                for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                    leftAvgValue = 0.0
-                    rightAvgValue = 0.0
-                    for jdx in 0..<Int(dsFactor) {
-                        leftAvgValue += abs(fcd[0][(idx * Int(dsFactor)) + jdx])
-                        rightAvgValue += abs(fcd[1][(idx * Int(dsFactor)) + jdx])
-                    }
-                    fcd[0][idx] = leftAvgValue / Float(dsFactor)
-                    fcd[1][idx] = rightAvgValue / Float(dsFactor)
-                }
-            }
-        case (.avgValue, true):
-            timing(index: index, key: "downsample", comment: "af", stats: timeStats) {
-                for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                    vDSP_meamgv(fcd[0] + (idx * Int(dsFactor)), 1, fcd[0] + idx, vDSP_Length(dsFactor))
-                    vDSP_meamgv(fcd[1] + (idx * Int(dsFactor)), 1, fcd[1] + idx, vDSP_Length(dsFactor))
-                }
-            }
+        switch (strategy, useAccelForDs) {
         case (.maxValue, false):
             timing(index: index, key: "downsample", comment: "", stats: timeStats) {
                 var leftMaxValue:Float
@@ -313,9 +294,30 @@ class Sampler: NSObject {
             }
         case (.maxValue, true):
             timing(index: index, key: "downsample", comment: "af", stats: timeStats) {
+                //
+                // Insert Accelerate downsample code here
+                //
+            }
+        case (.avgValue, false):
+            timing(index: index, key: "downsample", comment: "", stats: timeStats) {
+                var leftAvgValue:Float
+                var rightAvgValue:Float
                 for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                    vDSP_maxmgv(fcd[0] + (idx * Int(dsFactor)), 1, fcd[0] + idx, vDSP_Length(dsFactor))
-                    vDSP_maxmgv(fcd[1] + (idx * Int(dsFactor)), 1, fcd[1] + idx, vDSP_Length(dsFactor))
+                    leftAvgValue = 0.0
+                    rightAvgValue = 0.0
+                    for jdx in 0..<Int(dsFactor) {
+                        leftAvgValue += abs(fcd[0][(idx * Int(dsFactor)) + jdx])
+                        rightAvgValue += abs(fcd[1][(idx * Int(dsFactor)) + jdx])
+                    }
+                    fcd[0][idx] = leftAvgValue / Float(dsFactor)
+                    fcd[1][idx] = rightAvgValue / Float(dsFactor)
+                }
+            }
+        case (.avgValue, true):
+            timing(index: index, key: "downsample", comment: "af", stats: timeStats) {
+                for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
+                    vDSP_meamgv(fcd[0] + (idx * Int(dsFactor)), 1, fcd[0] + idx, vDSP_Length(dsFactor))
+                    vDSP_meamgv(fcd[1] + (idx * Int(dsFactor)), 1, fcd[1] + idx, vDSP_Length(dsFactor))
                 }
             }
         case (.sampleValue, false):
@@ -342,7 +344,7 @@ class Sampler: NSObject {
         
             let frameLength = frameBuffer.frameLength > sampleBuffer.frameCapacity ? sampleBuffer.frameCapacity : frameBuffer.frameLength
             
-            switch useAccel {
+            switch useAccelForMerge {
             case false:
                 timing(index: index, key: "merge", comment: "", stats: timeStats) {
                     for idx in 0..<Int(frameLength) {
@@ -351,8 +353,9 @@ class Sampler: NSObject {
                 }
             case true:
                 timing(index: index, key: "merge", comment: "af", stats: timeStats) {
-                    var avg:Float = 0.5
-                    vDSP_vasm(fcd[0], 1, fcd[1], 1, &avg, sfd, 1, vDSP_Length(frameLength))
+                    //
+                    // Insert Accelerate merge code here
+                    //
                 }
             }
             sampleBuffer.frameLength = frameLength
@@ -364,7 +367,7 @@ class Sampler: NSObject {
         var peak:Float = 1.0
         var scale:Float = 1.0
         
-        switch useAccel {
+        switch useAccelForNormalise {
         case false:
             timing(index: index, key: "normalise", comment: "", stats: timeStats) {
                 peak = 0.0
@@ -385,12 +388,12 @@ class Sampler: NSObject {
         }
     }
     
-    private func buildPath(sampleBuffer: SampleBuffer) {
+    private func buildPointArray(sampleBuffer: SampleBuffer) {
         guard let fd = sampleBuffer.floatData, sampleBuffer.frameLength > 0 else { return }
         
         var ptArray = Array<CGPoint>.init(repeating: CGPoint(x: 0.0, y: 0.0), count: Int(sampleBuffer.frameLength) * 2)
 
-        switch useAccel {
+        switch useAccelForBuildPoints {
         case false:
             timing(index: index, key: "buildpoints", comment: "", stats: timeStats) {
                 for idx in 0..<Int(sampleBuffer.frameLength) {
@@ -402,21 +405,40 @@ class Sampler: NSObject {
             }
          case true:
             timing(index: index, key: "buildpoints", comment: "", stats: timeStats) {
-                ptArray.withUnsafeMutableBufferPointer { buffer in
-                    guard let bp = buffer.baseAddress else { return }
-                    
-                    let doublesPtr = UnsafeMutableRawPointer(bp).bindMemory(to: Double.self, capacity: Int(sampleBuffer.frameLength) * 2)
-                    var startValue:Double = 0.0
-                    var incrBy:Double = 1.0
-                    vDSP_vrampD(&startValue, &incrBy, doublesPtr, 2, vDSP_Length(sampleBuffer.frameLength))
-                    vDSP_vrampD(&startValue, &incrBy, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 2, -2, vDSP_Length(sampleBuffer.frameLength))
-                    vDSP_vspdp(fd, 1, doublesPtr + 1, 2, vDSP_Length(sampleBuffer.frameLength))
-                    vDSP_vneg(fd, 1, fd, 1, vDSP_Length(sampleBuffer.frameLength))
-                    vDSP_vspdp(fd, 1, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 1, -2, vDSP_Length(sampleBuffer.frameLength))
-                }
+                //
+                // Insert Accelerate build point array code here
+                //
             }
         }
         sampleBuffer.points = ptArray
     }
     
 }
+/*
+ // Accelerate downsample code
+ for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
+ vDSP_maxmgv(fcd[0] + (idx * Int(dsFactor)), 1, fcd[0] + idx, vDSP_Length(dsFactor))
+ vDSP_maxmgv(fcd[1] + (idx * Int(dsFactor)), 1, fcd[1] + idx, vDSP_Length(dsFactor))
+ }
+
+ 
+ // Accelerate merge code
+ var avg:Float = 0.5
+ vDSP_vasm(fcd[0], 1, fcd[1], 1, &avg, sfd, 1, vDSP_Length(frameLength))
+
+ 
+ // Accelerate build point array code
+ ptArray.withUnsafeMutableBufferPointer { buffer in
+ guard let bp = buffer.baseAddress else { return }
+ 
+ let doublesPtr = UnsafeMutableRawPointer(bp).bindMemory(to: Double.self, capacity: Int(sampleBuffer.frameLength) * 2)
+ var startValue:Double = 0.0
+ var incrBy:Double = 1.0
+ vDSP_vrampD(&startValue, &incrBy, doublesPtr, 2, vDSP_Length(sampleBuffer.frameLength))
+ vDSP_vrampD(&startValue, &incrBy, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 2, -2, vDSP_Length(sampleBuffer.frameLength))
+ vDSP_vspdp(fd, 1, doublesPtr + 1, 2, vDSP_Length(sampleBuffer.frameLength))
+ vDSP_vneg(fd, 1, fd, 1, vDSP_Length(sampleBuffer.frameLength))
+ vDSP_vspdp(fd, 1, doublesPtr + (Int(sampleBuffer.frameLength) * 4) - 1, -2, vDSP_Length(sampleBuffer.frameLength))
+ }
+
+ */

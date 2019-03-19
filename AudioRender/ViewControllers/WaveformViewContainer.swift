@@ -60,7 +60,7 @@ class WaveformViewContainer: UIViewController, SampleRequestProtocol {
     func setAsset(assetURL:URL, pFormat:AVAudioFormat) {
         // Create a new global time stats object
         timeStats = Statistics()
-        timeStats.setTitle(title: "Strategy: \(strategy.rawValue), \nUsing Accelerate: \(useAccel ? "Yes" : "No") \nMulti-reader: \(useMultiReader ? "Yes" : "No") \nNum Readers: \(useMultiReader ? kNumReaders : 1) \nRender style: \(renderConfig.rawValue)")
+        timeStats.setTitle(title: "Strategy: \(strategy.rawValue), \nUsing Accelerate: Ds: \(useAccelForDs ? "Y" : "N"), Merge: \(useAccelForMerge ? "Y" : "N"), Normalise: \(useAccelForNormalise ? "Y" : "N"), BuildPoints: \(useAccelForBuildPoints ? "Y" : "N") \nMulti-reader: \(useMultiReader ? "Yes" : "No") \nNum Readers: \(useMultiReader ? kNumReaders : 1) \nRender style: \(renderConfig.rawValue)")
         
         sampler.setAsset(assetURL: assetURL, processingFormat: pFormat)
         onRenderInitialWaveform.fire(.slider)
