@@ -43,7 +43,6 @@ let kWaveformYScale         = CGFloat(0.9)
 //
 enum RenderConfig:String {
     case basic = "Basic"            // Individual lines scaled and drawn sequentially
-    case transform = "Transform"    // Individual lines inserted into path, scaled by transform
     case linkLines = "Link Lines"   // Joined lines inserted into path, scaled by transform
     case outline = "Outline"        // Outline inserted into path, scaled by transform
     case fill = "Fill"              // Outline inserted into path, scaled by transform and filled
@@ -191,73 +190,51 @@ extension WaveformViewLayerDelegate {
             }
             
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStrokeWithPath(ctx: ctx, path: path)
+                doStroke(ctx: ctx, path: path)
             }
-        }
-        else if renderConfig == .transform {
-            guard sb.points.count > 0 else { return }
-            
-            let path = CGMutablePath()
-            //
-            // Insert transform code here
-            //
-            var tf = CGAffineTransform.identity
-            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
-            tf = tf.translatedBy(x: 0.0, y: layer.bounds.height / 2)
-            tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
-            
-            timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
-                for idx in 0..<sb.points.count / 2 {
-                    path.move(to: CGPoint(x: CGFloat(idx), y: sb.points[idx].y), transform: tf)
-                    path.addLine(to: CGPoint(x: CGFloat(idx), y: -sb.points[idx].y), transform: tf)
-                }
-            }
-            
-            timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStrokeWithPath(ctx: ctx, path: path)
-            }
-
         }
         else if renderConfig == .linkLines {
             guard sb.points.count > 0 else { return }
             
             let path = CGMutablePath()
-            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
-            let tf = CGAffineTransform(offsetX: CGFloat(0.0),
-                                       offsetY: layer.bounds.height / 2,
-                                       scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
-                                       scaleY: (layer.bounds.height / 2) * yScale)
             
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
+                let yTranslation:CGFloat = layer.bounds.height / 2
+                let xScale = layer.bounds.size.width / CGFloat(sb.frameLength)
+                let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformYScale
                 path.move(to: CGPoint(x: 0.0, y: 0.0))
                 for idx in 0..<sb.points.count / 2 {
+                    let xScaled = CGFloat(xScale * CGFloat(idx))
+                    let yScaled = CGFloat(yScale * sb.points[idx].y)
                     let modifier = idx % 2 == 0 ? 1 : -1
-                    path.addLine(to: CGPoint(x: CGFloat(idx), y: sb.points[idx].y * CGFloat(modifier)), transform: tf)
-                    path.addLine(to: CGPoint(x: CGFloat(idx), y: sb.points[idx].y * CGFloat(-modifier)), transform: tf)
+                    path.addLine(to: CGPoint(x: xScaled, y: (yTranslation - (yScaled * CGFloat(modifier)))))
+                    path.addLine(to: CGPoint(x: xScaled, y: (yTranslation + (yScaled * CGFloat(modifier)))))
                 }
             }
             
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStrokeWithPath(ctx: ctx, path: path)
+                doStroke(ctx: ctx, path: path)
             }
-
+            
         }
         else if renderConfig == .outline {
             guard sb.points.count > 0 else { return }
             
             let path = CGMutablePath()
+            //
+            // Add create transform code here
+            //
+            var tf = CGAffineTransform.identity
             let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
-            let tf = CGAffineTransform(offsetX: CGFloat(0.0),
-                                       offsetY: layer.bounds.height / 2,
-                                       scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
-                                       scaleY: (layer.bounds.height / 2) * yScale)
-            
+            tf = tf.translatedBy(x: 0.0, y: layer.bounds.height / 2)
+            tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
+
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 path.addLines(between: sb.points, transform: tf)
             }
 
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStrokeWithPath(ctx: ctx, path: path)
+                doStroke(ctx: ctx, path: path)
             }
 
         }
@@ -277,30 +254,18 @@ extension WaveformViewLayerDelegate {
             }
             
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doFillWithCGPath(ctx: ctx, path: path)
+                doFill(ctx: ctx, path: path)
             }
         }
     }
     
-    private func doStroke(ctx:CGContext, lines:UIBezierPath) {
-        ctx.beginPath()
-        ctx.addPath(lines.cgPath)
-        ctx.strokePath()
-    }
-    
-    private func doStrokeWithPath(ctx:CGContext, path:CGMutablePath) {
+    private func doStroke(ctx:CGContext, path:CGMutablePath) {
         ctx.beginPath()
         ctx.addPath(path)
         ctx.strokePath()
     }
     
-    private func doFill(ctx:CGContext, lines:UIBezierPath) {
-        ctx.beginPath()
-        ctx.addPath(lines.cgPath)
-        ctx.fillPath()
-    }
-    
-    private func doFillWithCGPath(ctx:CGContext, path:CGMutablePath) {
+    private func doFill(ctx:CGContext, path:CGMutablePath) {
         ctx.beginPath()
         ctx.addPath(path)
         ctx.fillPath()
