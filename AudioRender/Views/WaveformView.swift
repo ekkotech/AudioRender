@@ -275,11 +275,10 @@ extension WaveformViewLayerDelegate {
 
 /*
  // Affine transform code
- let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sBuff.peak)) : kWaveformYScale
  var tf = CGAffineTransform.identity
- tf = tf.translatedBy(x: 0.0, y: bounds.height / 2)
- tf = tf.scaledBy(x: bounds.width / CGFloat(sBuff.frameLength), y: (bounds.height / 2) * yScale)
- lines.apply(tf)
+ let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+ tf = tf.translatedBy(x: 0.0, y: layer.bounds.height / 2)
+ tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
 
  //
  
