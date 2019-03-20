@@ -21,7 +21,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                             </imageView>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5Ox-sa-4iz">
-                                <rect key="frame" x="0.0" y="96" width="320" height="288"/>
+                                <rect key="frame" x="0.0" y="96" width="320" height="284"/>
                                 <connections>
                                     <segue destination="V51-yD-sk1" kind="embed" id="QBP-nu-SM1"/>
                                 </connections>
@@ -48,23 +48,47 @@
                                     <action selector="handleFileButtonTouchUp:" destination="BYZ-38-t0r" eventType="touchUpInside" id="UiX-HK-nmZ"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Du-LM-g90">
+                                <rect key="frame" x="140" y="420" width="40" height="40"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="40" id="El3-zC-hHF"/>
+                                    <constraint firstAttribute="height" constant="40" id="kqx-NH-E43"/>
+                                </constraints>
+                                <state key="normal" image="Play"/>
+                                <connections>
+                                    <action selector="handlePlayButtonTouchUp:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Ocn-jf-l15"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2HP-gE-EJP">
+                                <rect key="frame" x="60" y="420" width="40" height="40"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="40" id="hdS-zj-NbM"/>
+                                    <constraint firstAttribute="height" constant="40" id="oIi-cQ-bzt"/>
+                                </constraints>
+                                <state key="normal" image="Previous"/>
+                                <connections>
+                                    <action selector="handlePreviousButtonTouchUp:" destination="BYZ-38-t0r" eventType="touchUpInside" id="B5K-8Z-i80"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <constraints>
                             <constraint firstItem="cTo-18-6iJ" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="14e-Lr-FEG"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="5Ox-sa-4iz" secondAttribute="trailing" id="5ae-DL-6I5"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="cTo-18-6iJ" secondAttribute="trailing" id="CJ3-NR-cUA"/>
                             <constraint firstItem="ql2-C8-O2H" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="WGm-BR-Xdh" secondAttribute="trailing" priority="900" constant="8" symbolic="YES" id="Egc-WE-X5O"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="5Ox-sa-4iz" secondAttribute="trailing" id="LX0-nm-Ucs"/>
+                            <constraint firstItem="2Du-LM-g90" firstAttribute="leading" secondItem="2HP-gE-EJP" secondAttribute="trailing" constant="40" id="L85-3z-GfW"/>
+                            <constraint firstItem="2HP-gE-EJP" firstAttribute="centerY" secondItem="2Du-LM-g90" secondAttribute="centerY" id="PFa-3b-xfQ"/>
                             <constraint firstAttribute="bottom" secondItem="cTo-18-6iJ" secondAttribute="bottom" id="QQU-Pb-kay"/>
+                            <constraint firstItem="2Du-LM-g90" firstAttribute="bottom" secondItem="cTo-18-6iJ" secondAttribute="bottom" constant="-20" id="RHA-df-OCD"/>
                             <constraint firstItem="5Ox-sa-4iz" firstAttribute="top" secondItem="WGm-BR-Xdh" secondAttribute="bottom" constant="11" id="UJG-4X-JzJ"/>
                             <constraint firstItem="WGm-BR-Xdh" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="UbY-4h-APR"/>
+                            <constraint firstItem="2Du-LM-g90" firstAttribute="top" secondItem="5Ox-sa-4iz" secondAttribute="bottom" constant="40" id="XMd-08-Fls"/>
                             <constraint firstItem="5Ox-sa-4iz" firstAttribute="top" secondItem="ql2-C8-O2H" secondAttribute="bottom" constant="11" id="ac2-KX-axz"/>
                             <constraint firstItem="5Ox-sa-4iz" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="grq-Co-R3I"/>
                             <constraint firstItem="ql2-C8-O2H" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="23" id="jcP-aP-46Y"/>
                             <constraint firstItem="WGm-BR-Xdh" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="23" id="jyO-3L-77S"/>
-                            <constraint firstItem="5Ox-sa-4iz" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="kTF-Le-H9L"/>
                             <constraint firstItem="cTo-18-6iJ" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="lso-S2-XLp"/>
-                            <constraint firstItem="5Ox-sa-4iz" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="0.6" id="sup-4B-leB"/>
+                            <constraint firstItem="2Du-LM-g90" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="o31-DX-S74"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="ql2-C8-O2H" secondAttribute="trailing" id="zOa-bI-ndk"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
@@ -73,6 +97,8 @@
                         <outlet property="containerView" destination="5Ox-sa-4iz" id="86B-Vu-l6l"/>
                         <outlet property="filesButton" destination="WGm-BR-Xdh" id="kSv-jV-pEm"/>
                         <outlet property="libraryButton" destination="ql2-C8-O2H" id="eDY-n2-0uD"/>
+                        <outlet property="playButton" destination="2Du-LM-g90" id="YJK-Vf-G1O"/>
+                        <outlet property="previousButton" destination="2HP-gE-EJP" id="A90-Wb-IU7"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -84,15 +110,15 @@
             <objects>
                 <viewController id="V51-yD-sk1" customClass="WaveformViewContainer" customModule="AudioRender" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Bwg-t8-rNE">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="288"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="284"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rzi-cW-nwg" customClass="SliderView" customModule="AudioRender" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="86.5"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="85"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="U10-ix-rgH" customClass="ScrollerView" customModule="AudioRender" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="86.5" width="320" height="201.5"/>
+                                <rect key="frame" x="0.0" y="85" width="320" height="199"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                         </subviews>
@@ -158,6 +184,8 @@
     <resources>
         <image name="Files" width="40" height="40"/>
         <image name="Note" width="40" height="40"/>
+        <image name="Play" width="40" height="40"/>
+        <image name="Previous" width="40" height="40"/>
         <image name="SplashBg" width="300" height="600"/>
     </resources>
 </document>

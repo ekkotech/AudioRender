@@ -37,6 +37,8 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
     //
     @IBOutlet weak var libraryButton: UIButton!
     @IBOutlet weak var filesButton: UIButton!
+    @IBOutlet weak var previousButton: UIButton!
+    @IBOutlet weak var playButton: UIButton!
     @IBOutlet var containerView: UIView!
     
     //
@@ -140,6 +142,36 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
         
     }
     
+    @IBAction func handlePreviousButtonTouchUp(_ sender: Any) {
+        
+        stopPlayer()
+        playFile.framePosition = 0
+        player.scheduleSegment(playFile, startingFrame: 0, frameCount: AVAudioFrameCount(playFile.length), at: nil, completionHandler: {
+            self.playButton.isEnabled = false
+        })
+        playButton.isSelected = false
+        playButton.isEnabled = true
+    }
+    
+    @IBAction func handlePlayButtonTouchUp(_ sender: Any) {
+        
+        playButton.isSelected = !playButton.isSelected
+        
+        if playButton.isSelected {
+            if !engine.isRunning { startEngine() }
+            startPlayer()
+        }
+        else {
+            pausePlayer()
+        }
+    }
+    
+    @IBAction func handleStopButtonTouchUp(_ sender: Any) {
+        
+        stopPlayer()
+    }
+    
+    
     //
     // MARK: - Initialisation Support Functions
     //
@@ -151,6 +183,11 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
         libraryButton.isEnabled = true
         filesButton.isEnabled = false
         #endif
+        
+        previousButton.isEnabled = false
+        playButton.setImage(UIImage(named: "Stop"), for: .selected)
+        playButton.setImage(UIImage(named: "Play"), for: .normal)
+        playButton.isEnabled = false
     }
     
     private func setupAudioSession() {
@@ -256,22 +293,25 @@ extension RootViewController: MPMediaPickerControllerDelegate {
         let mediaItem:MPMediaItem = mediaItemCollection.items[0]
         if let assetURL:URL = mediaItem.value(forProperty: MPMediaItemPropertyAssetURL) as? URL {
             
-            // Stop player if playing, etc.
+            if player.isPlaying { stopPlayer() }
             assetSelected(assetURL: assetURL)
             
-            if kPlayFile {
+//            if kPlayFile {
                 do {
                     playFile = try AVAudioFile(forReading: assetURL)
                     
                     player.scheduleSegment(playFile, startingFrame: 0, frameCount: AVAudioFrameCount(playFile.length), at: nil, completionHandler: {
+                        self.playButton.isEnabled = false
+                        self.previousButton.isEnabled = false
                     })
-                    startEngine()
-                    startPlayer()
+                    previousButton.isEnabled = true
+                    playButton.isSelected = false
+                    playButton.isEnabled = true
                 }
                 catch {
                     print("Error opening file: \(assetURL)")
                 }
-            }
+//            }
         }
     }
     
