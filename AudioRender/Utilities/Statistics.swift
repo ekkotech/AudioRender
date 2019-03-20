@@ -17,7 +17,7 @@ class Statistics {
         case total = "total"
         case downsample = "downsample"
         case merge = "merge"
-        case normalise = "normalise"
+        case peakcalc = "peakcalc"
         case buildpoints = "buildpoints"
         case buildpath = "buildpath"
         case transform = "transform"
@@ -53,8 +53,8 @@ class Statistics {
             if let ts = item["merge"] {
                 print("Merge: \(ts.comment) \t\t\(ts.end - ts.start)")
             }
-            if let ts = item["normalise"] {
-                print("Normalise: \(ts.comment) \t\t\(ts.end - ts.start)")
+            if let ts = item["peakcalc"] {
+                print("Peak calc: \(ts.comment) \t\t\(ts.end - ts.start)")
             }
             if let ts = item["buildpoints"] {
                 print("Point array: \(ts.comment) \t\t\(ts.end - ts.start)")

@@ -25,17 +25,17 @@ let strategy:DsStrategy = .maxValue
 //
 let useAccelForDs = false
 let useAccelForMerge = false
-let useAccelForNormalise = false
+let useAccelForPeakCalc = false
 let useAccelForBuildPoints = false
 
 //
 // Multi-reader
 //
-let useMultiReader                = false
+let useMultiReader                = true
 // Make sure that the block size is an integer multiple of default downsample factor
 // Ideally, both should be powers of 2
 let kBlockSize                  = AVAudioFrameCount(524288)     // 2**19
-let kNumReaders                 = 1
+let kNumReaders                 = 2
 
 class Sampler: NSObject {
     
@@ -255,7 +255,7 @@ class Sampler: NSObject {
                 timeStats.setTimeParameter(index: index, key: "fileread", timing: (comment: "", start: readFileStartTime, end: CACurrentMediaTime()))
                 downsample(frameBuffer: pcmb, dsFactor: dsFactor)
                 merge(frameBuffer: pcmb, sampleBuffer: sBuff)
-//                normalise(sampleBuffer: sBuff)
+                calcPeak(sampleBuffer: sBuff)
                 buildPointArray(sampleBuffer: sBuff)
                 completion(sBuff)
             }
@@ -357,37 +357,30 @@ class Sampler: NSObject {
                     //
                     // Insert Accelerate merge code here
                     //
-
                 }
             }
             sampleBuffer.frameLength = frameLength
     }
     
-    private func normalise(sampleBuffer:SampleBuffer) {
+    private func calcPeak(sampleBuffer:SampleBuffer) {
         guard let sbfd = sampleBuffer.floatData else { return }
+    
+        var peakValue = Float(0.0)
         
-        var peak:Float = 1.0
-        var scale:Float = 1.0
-        
-        switch useAccelForNormalise {
+        switch useAccelForPeakCalc {
         case false:
-            timing(index: index, key: "normalise", comment: "", stats: timeStats) {
-                peak = 0.0
+            timing(index: index, key: "peakcalc", comment: "", stats: timeStats) {
                 for idx in 0..<Int(sampleBuffer.frameLength) {
-                    peak = sbfd[idx] > peak ? sbfd[idx] : peak
-                }
-                scale = 1.0 / peak
-                for idx in 0..<Int(sampleBuffer.frameLength) {
-                    sbfd[idx] = sbfd[idx] * scale
+                    peakValue = sbfd[idx] > peakValue ? sbfd[idx] : peakValue
                 }
             }
         case true:
-            timing(index: index, key: "normalise", comment: "af", stats: timeStats) {
-                vDSP_maxv(sbfd, 1, &peak, vDSP_Length(sampleBuffer.frameLength))
-                scale = 1.0 / peak
-                vDSP_vsmul(sbfd, 1, &scale, sbfd, 1, vDSP_Length(sampleBuffer.frameLength))
+            timing(index: index, key: "peakcalc", comment: "", stats: timeStats) {
+                vDSP_maxv(sbfd, 1, &peakValue, vDSP_Length(sampleBuffer.frameLength))
             }
         }
+        sampleBuffer.peak = peakValue
+        _peak = peakValue
     }
     
     private func buildPointArray(sampleBuffer: SampleBuffer) {
@@ -410,7 +403,6 @@ class Sampler: NSObject {
                 //
                 // Insert Accelerate build point array code here
                 //
-
             }
         }
         sampleBuffer.points = ptArray
