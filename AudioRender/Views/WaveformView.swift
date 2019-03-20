@@ -144,7 +144,7 @@ extension WaveformViewLayerDelegate {
         let index = pv is SliderView ? 0 : 1
         let path = CGMutablePath()
         let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
-        let tf = CGAffineTransform.init(offsetX: CGFloat(0.0),
+        let tf = CGAffineTransform.init(offsetX: CGFloat(0.5),
                                         offsetY: layer.bounds.height / 2,
                                         scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
                                         scaleY: (layer.bounds.height / 2) * yScale)
@@ -184,8 +184,8 @@ extension WaveformViewLayerDelegate {
                 for idx in 0..<sb.points.count / 2 {
                     let xScaled = CGFloat(xScale * CGFloat(idx))
                     let yScaled = CGFloat(yScale * sb.points[idx].y)
-                    path.move(to: CGPoint(x: xScaled, y: yTranslation - yScaled))
-                    path.addLine(to: CGPoint(x: xScaled, y: yTranslation + yScaled))
+                    path.move(to: CGPoint(x: xScaled + 0.5, y: yTranslation - yScaled))
+                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: yTranslation + yScaled))
                 }
             }
             
@@ -207,8 +207,8 @@ extension WaveformViewLayerDelegate {
                     let xScaled = CGFloat(xScale * CGFloat(idx))
                     let yScaled = CGFloat(yScale * sb.points[idx].y)
                     let modifier = idx % 2 == 0 ? 1 : -1
-                    path.addLine(to: CGPoint(x: xScaled, y: (yTranslation - (yScaled * CGFloat(modifier)))))
-                    path.addLine(to: CGPoint(x: xScaled, y: (yTranslation + (yScaled * CGFloat(modifier)))))
+                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: (yTranslation - (yScaled * CGFloat(modifier)))))
+                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: (yTranslation + (yScaled * CGFloat(modifier)))))
                 }
             }
             
@@ -240,7 +240,7 @@ extension WaveformViewLayerDelegate {
             
             let path = CGMutablePath()
             let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
-            let tf = CGAffineTransform.init(offsetX: CGFloat(0.0),
+            let tf = CGAffineTransform.init(offsetX: CGFloat(0.5),
                                             offsetY: layer.bounds.height / 2,
                                             scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
                                             scaleY: (layer.bounds.height / 2) * yScale)
@@ -274,7 +274,7 @@ extension WaveformViewLayerDelegate {
  // Affine transform code
  var tf = CGAffineTransform.identity
  let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
- tf = tf.translatedBy(x: 0.0, y: layer.bounds.height / 2)
+ tf = tf.translatedBy(x: 0.5, y: layer.bounds.height / 2)
  tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
 
  //
