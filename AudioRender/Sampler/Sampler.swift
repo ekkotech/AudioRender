@@ -297,6 +297,7 @@ class Sampler: NSObject {
                 //
                 // Insert Accelerate downsample code here
                 //
+
             }
         case (.avgValue, false):
             timing(index: index, key: "downsample", comment: "", stats: timeStats) {
@@ -356,6 +357,7 @@ class Sampler: NSObject {
                     //
                     // Insert Accelerate merge code here
                     //
+
                 }
             }
             sampleBuffer.frameLength = frameLength
@@ -408,12 +410,28 @@ class Sampler: NSObject {
                 //
                 // Insert Accelerate build point array code here
                 //
+
             }
         }
         sampleBuffer.points = ptArray
     }
     
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
  // Accelerate downsample code
  for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
