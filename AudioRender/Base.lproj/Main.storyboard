@@ -21,7 +21,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="320" height="480"/>
                             </imageView>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="5Ox-sa-4iz">
-                                <rect key="frame" x="0.0" y="96" width="320" height="284"/>
+                                <rect key="frame" x="0.0" y="96" width="320" height="264"/>
                                 <connections>
                                     <segue destination="V51-yD-sk1" kind="embed" id="QBP-nu-SM1"/>
                                 </connections>
@@ -49,10 +49,10 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Du-LM-g90">
-                                <rect key="frame" x="140" y="420" width="40" height="40"/>
+                                <rect key="frame" x="130" y="400" width="60" height="60"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="40" id="El3-zC-hHF"/>
-                                    <constraint firstAttribute="height" constant="40" id="kqx-NH-E43"/>
+                                    <constraint firstAttribute="width" constant="60" id="El3-zC-hHF"/>
+                                    <constraint firstAttribute="height" constant="60" id="kqx-NH-E43"/>
                                 </constraints>
                                 <state key="normal" image="Play"/>
                                 <connections>
@@ -60,10 +60,10 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2HP-gE-EJP">
-                                <rect key="frame" x="60" y="420" width="40" height="40"/>
+                                <rect key="frame" x="30" y="400" width="60" height="60"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="40" id="hdS-zj-NbM"/>
-                                    <constraint firstAttribute="height" constant="40" id="oIi-cQ-bzt"/>
+                                    <constraint firstAttribute="width" constant="60" id="hdS-zj-NbM"/>
+                                    <constraint firstAttribute="height" constant="60" id="oIi-cQ-bzt"/>
                                 </constraints>
                                 <state key="normal" image="Previous"/>
                                 <connections>
@@ -110,15 +110,15 @@
             <objects>
                 <viewController id="V51-yD-sk1" customClass="WaveformViewContainer" customModule="AudioRender" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Bwg-t8-rNE">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="284"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="264"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rzi-cW-nwg" customClass="SliderView" customModule="AudioRender" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="0.0" width="320" height="85"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="79"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="U10-ix-rgH" customClass="ScrollerView" customModule="AudioRender" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="85" width="320" height="199"/>
+                                <rect key="frame" x="0.0" y="79" width="320" height="185"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                         </subviews>
@@ -184,8 +184,8 @@
     <resources>
         <image name="Files" width="40" height="40"/>
         <image name="Note" width="40" height="40"/>
-        <image name="Play" width="40" height="40"/>
-        <image name="Previous" width="40" height="40"/>
+        <image name="Play" width="60" height="60"/>
+        <image name="Previous" width="60" height="60"/>
         <image name="SplashBg" width="300" height="600"/>
     </resources>
 </document>

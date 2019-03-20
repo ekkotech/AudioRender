@@ -151,6 +151,7 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
         })
         playButton.isSelected = false
         playButton.isEnabled = true
+        previousButton.isEnabled = true
     }
     
     @IBAction func handlePlayButtonTouchUp(_ sender: Any) {
@@ -165,12 +166,6 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
             pausePlayer()
         }
     }
-    
-    @IBAction func handleStopButtonTouchUp(_ sender: Any) {
-        
-        stopPlayer()
-    }
-    
     
     //
     // MARK: - Initialisation Support Functions
