@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D103ADA122445B7E0042D61A /* Aaya Lolo-44-MP3-128.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D103ADA022445B7E0042D61A /* Aaya Lolo-44-MP3-128.mp3 */; };
+		D103ADA222445B7E0042D61A /* Aaya Lolo-44-MP3-128.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = D103ADA022445B7E0042D61A /* Aaya Lolo-44-MP3-128.mp3 */; };
 		D14FB2DA223779000042C4B3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB2D9223779000042C4B3 /* AppDelegate.swift */; };
 		D14FB2DC223779000042C4B3 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB2DB223779000042C4B3 /* RootViewController.swift */; };
 		D14FB2DF223779000042C4B3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D14FB2DD223779000042C4B3 /* Main.storyboard */; };
@@ -74,6 +76,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D103ADA022445B7E0042D61A /* Aaya Lolo-44-MP3-128.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Aaya Lolo-44-MP3-128.mp3"; sourceTree = "<group>"; };
 		D14FB2D6223779000042C4B3 /* AudioRender.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioRender.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D14FB2D9223779000042C4B3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D14FB2DB223779000042C4B3 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
@@ -248,6 +251,7 @@
 		D14FB31A22377B900042C4B3 /* Audio */ = {
 			isa = PBXGroup;
 			children = (
+				D103ADA022445B7E0042D61A /* Aaya Lolo-44-MP3-128.mp3 */,
 				D14FB31C22377BAE0042C4B3 /* Aaya Lolo-48-AAC-192.m4a */,
 				D14FB31B22377BAE0042C4B3 /* Aaya Lolo-48-MP3-192.mp3 */,
 				D14FB31D22377BB00042C4B3 /* Aaya Lolo-48-WAV.wav */,
@@ -373,6 +377,7 @@
 			files = (
 				D14FB2E4223779020042C4B3 /* LaunchScreen.storyboard in Resources */,
 				D14FB2E1223779020042C4B3 /* Assets.xcassets in Resources */,
+				D103ADA122445B7E0042D61A /* Aaya Lolo-44-MP3-128.mp3 in Resources */,
 				D14FB2DF223779000042C4B3 /* Main.storyboard in Resources */,
 				D14FB31F22377BB10042C4B3 /* Aaya Lolo-48-MP3-192.mp3 in Resources */,
 				D14FB32322377BB10042C4B3 /* Aaya Lolo-48-WAV.wav in Resources */,
@@ -386,6 +391,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D14FB32222377BB10042C4B3 /* Aaya Lolo-48-AAC-192.m4a in Resources */,
+				D103ADA222445B7E0042D61A /* Aaya Lolo-44-MP3-128.mp3 in Resources */,
 				D14FB32422377BB10042C4B3 /* Aaya Lolo-48-WAV.wav in Resources */,
 				D14FB32022377BB10042C4B3 /* Aaya Lolo-48-MP3-192.mp3 in Resources */,
 				D14FB32622377BB10042C4B3 /* Able Mable (LP Version).wav in Resources */,

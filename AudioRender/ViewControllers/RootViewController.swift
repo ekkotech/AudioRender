@@ -57,7 +57,8 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
     //
     private var fileListViewController:UITableViewController? = nil
     private let fileResources:[(displayName: String, fileName: String, fileExt: String)] =
-        [("Aaya Lolo 48kHz 192kbps mp3", "Aaya Lolo-48-MP3-192", "mp3"),
+        [("Aaya Lolo 44kHz 128kbps mp3", "Aaya Lolo-44-MP3-128", "mp3"),
+         ("Aaya Lolo 48kHz 192kbps mp3", "Aaya Lolo-48-MP3-192", "mp3"),
          ("Aaya Lolo 48kHz, wav", "Aaya Lolo-48-WAV", "wav"),
          ("Aaya Lolo 48kHz 192kbps AAC", "Aaya Lolo-48-AAC-192", "m4a"),
          ("Able Mable 44.1kHz 128kbps wav", "Able Mable (LP Version)", "wav")]
@@ -176,7 +177,7 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
         filesButton.isEnabled = true
         #else
         libraryButton.isEnabled = true
-        filesButton.isEnabled = false
+        filesButton.isEnabled = true
         #endif
         
         previousButton.isEnabled = false
@@ -266,10 +267,33 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
         }
     }
     
-    func onSampleBuffer(sBuff:SampleBuffer) {
-        
+    private func didSelectAsset(assetURL:URL) {
+        if player.isPlaying { stopPlayer() }
+        assetSelected(assetURL: assetURL)
+        prepareAssetForPlay(assetURL: assetURL)
     }
     
+    private func prepareAssetForPlay(assetURL:URL) {
+        do {
+            playFile = try AVAudioFile(forReading: assetURL)
+            scheduleSegment(file: playFile, start: 0, length: AVAudioFrameCount(playFile.length))
+            previousButton.isEnabled = true
+            playButton.isSelected = false
+            playButton.isEnabled = true
+        }
+        catch {
+            print("Error opening file: \(assetURL)")
+        }
+
+    }
+    
+    private func scheduleSegment(file:AVAudioFile, start:AVAudioFramePosition, length:AVAudioFrameCount) {
+        player.scheduleSegment(playFile, startingFrame: 0, frameCount: AVAudioFrameCount(playFile.length), at: nil, completionHandler: {
+            self.playButton.isEnabled = false
+            self.previousButton.isEnabled = false
+        })
+
+    }
 }
 
 //
@@ -288,25 +312,7 @@ extension RootViewController: MPMediaPickerControllerDelegate {
         let mediaItem:MPMediaItem = mediaItemCollection.items[0]
         if let assetURL:URL = mediaItem.value(forProperty: MPMediaItemPropertyAssetURL) as? URL {
             
-            if player.isPlaying { stopPlayer() }
-            assetSelected(assetURL: assetURL)
-            
-//            if kPlayFile {
-                do {
-                    playFile = try AVAudioFile(forReading: assetURL)
-                    
-                    player.scheduleSegment(playFile, startingFrame: 0, frameCount: AVAudioFrameCount(playFile.length), at: nil, completionHandler: {
-                        self.playButton.isEnabled = false
-                        self.previousButton.isEnabled = false
-                    })
-                    previousButton.isEnabled = true
-                    playButton.isSelected = false
-                    playButton.isEnabled = true
-                }
-                catch {
-                    print("Error opening file: \(assetURL)")
-                }
-//            }
+            didSelectAsset(assetURL: assetURL)
         }
     }
     
@@ -426,9 +432,9 @@ extension RootViewController {
         let row = indexPath.row
         
         if section == 0 {
-            if let url = Bundle.main.url(forResource: fileResources[row].fileName,
+            if let assetURL = Bundle.main.url(forResource: fileResources[row].fileName,
                                          withExtension: fileResources[row].fileExt) {
-                assetSelected(assetURL: url)
+                didSelectAsset(assetURL: assetURL)
                 dismiss(animated: true, completion: nil)
             }
         }
