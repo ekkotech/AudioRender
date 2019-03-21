@@ -49,7 +49,7 @@ enum RenderConfig:String {
     case mask = "Mask"              // Outline inserted into path, scaled by transform and masked
 }
 
-let renderConfig:RenderConfig   = .mask
+let renderConfig:RenderConfig   = .basic
 let shouldNormalise             = true
 
 class WaveformView: UIView {
