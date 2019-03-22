@@ -45,13 +45,12 @@ let kWaveformYScale         = CGFloat(0.9)
 enum RenderConfig:String {
     case basic = "Basic"            // Individual lines scaled and drawn sequentially
     case linkLines = "Link Lines"   // Joined lines inserted into path, scaled by transform
-    case outline = "Outline"        // Outline inserted into path, scaled by transform
     case fill = "Fill"              // Outline inserted into path, scaled by transform and filled
     case mask = "Mask"              // Outline inserted into path, scaled by transform and masked
 }
 
 let renderConfig:RenderConfig   = .basic
-let shouldNormalise             = true
+let shouldNormalise             = false
 
 class WaveformView: UIView {
     
@@ -232,7 +231,7 @@ extension WaveformViewLayerDelegate {
             }
             
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStroke(ctx: ctx, path: path)
+                if let lyr = layer as? CAShapeLayer { lyr.path = path }
             }
         }
         else if renderConfig == .linkLines {
@@ -244,48 +243,32 @@ extension WaveformViewLayerDelegate {
                 let yTranslation:CGFloat = layer.bounds.height / 2
                 let xScale = layer.bounds.size.width / CGFloat(sb.frameLength)
                 let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformYScale
-                path.move(to: CGPoint(x: 0.0, y: 0.0))
+                path.move(to: CGPoint(x: 0.0, y: yTranslation))
                 for idx in 0..<sb.points.count / 2 {
                     let xScaled = CGFloat(xScale * CGFloat(idx))
                     let yScaled = CGFloat(yScale * sb.points[idx].y)
                     let modifier = idx % 2 == 0 ? 1 : -1
                     path.addLine(to: CGPoint(x: xScaled + 0.5, y: (yTranslation - (yScaled * CGFloat(modifier)))))
                     path.addLine(to: CGPoint(x: xScaled + 0.5, y: (yTranslation + (yScaled * CGFloat(modifier)))))
+                    if idx == (sb.points.count / 2) - 1 {
+                        path.addLine(to: CGPoint(x: xScaled + 0.5, y: yTranslation))
+                    }
                 }
             }
             
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStroke(ctx: ctx, path: path)
+                if let lyr = layer as? CAShapeLayer { lyr.path = path }
             }
             
-        }
-        else if renderConfig == .outline {
-            guard sb.points.count > 0 else { return }
-            
-            let path = CGMutablePath()
-            //
-            // Add create transform code here
-            //
-            let tf = CGAffineTransform.identity
-
-            timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
-                path.addLines(between: sb.points, transform: tf)
-            }
-
-            timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doStroke(ctx: ctx, path: path)
-            }
-
         }
         else if renderConfig == .fill {
             guard sb.points.count > 0 else { return }
             
             let path = CGMutablePath()
-            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
-            let tf = CGAffineTransform.init(offsetX: CGFloat(0.5),
-                                            offsetY: layer.bounds.height / 2,
-                                            scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
-                                            scaleY: (layer.bounds.height / 2) * yScale)
+            //
+            // Add CGAffineTransform code here
+            //
+            let tf = CGAffineTransform.identity
 
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 path.addLines(between: sb.points, transform: tf)
@@ -293,7 +276,7 @@ extension WaveformViewLayerDelegate {
             }
             
             timing(index: index, key: "draw", comment: "", stats: timeStats) {
-                doFill(ctx: ctx, path: path)
+                if let lyr = layer as? CAShapeLayer { lyr.path = path }
             }
         }
     }
