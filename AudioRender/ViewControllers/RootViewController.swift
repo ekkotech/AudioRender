@@ -294,6 +294,15 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
         })
 
     }
+    
+    private func assetSelected(assetURL:URL) {
+        guard let pf = processingFormat, let cvc = children.first as? WaveformViewContainer else { return }
+        
+        // Stop player etc.
+        cvc.setAsset(assetURL: assetURL, pFormat:pf)
+        
+    }
+
 }
 
 //
@@ -319,14 +328,6 @@ extension RootViewController: MPMediaPickerControllerDelegate {
     func mediaPickerDidCancel(_ mediaPicker: MPMediaPickerController) {
         Logger.debug("Media picked cancelled")
         dismiss(animated: true, completion: nil)
-    }
-    
-    private func assetSelected(assetURL:URL) {
-        guard let pf = processingFormat, let cvc = children.first as? WaveformViewContainer else { return }
-        
-        // Stop player etc.
-        cvc.setAsset(assetURL: assetURL, pFormat:pf)
-        
     }
     
 }

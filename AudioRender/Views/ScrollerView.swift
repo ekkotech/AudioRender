@@ -12,7 +12,6 @@ import AVFoundation
 class ScrollerView: WaveformView {
     
     var dsFactor = kDsFactorScrollerInitial
-    let maxLayerWidth = UInt32(UIScreen.main.bounds.width > UIScreen.main.bounds.height ? UIScreen.main.bounds.width : UIScreen.main.bounds.height)
     let displayScale = UIScreen.main.scale
     public var sampleSourceDelegate:SampleRequestProtocol? = nil
     
@@ -53,7 +52,7 @@ class ScrollerView: WaveformView {
         cursorLayer.backgroundColor = scrollerViewPalette.cursorBackgroundColour
         cursorLayer.strokeColor = scrollerViewPalette.cursorLineColour
         cursorLayer.fillColor = scrollerViewPalette.cursorLineColour
-        cursorLayer.name = kLayerNameCursor
+        cursorLayer.name = kLayerNameCursorScroller
         cursorLayer.delegate = layerDelegate
     }
     
@@ -72,7 +71,7 @@ class ScrollerView: WaveformView {
     func onRenderInitialWaveform(target:RenderTarget) {
         guard let ssd = sampleSourceDelegate, target == .scroller else { return }
         
-        ssd.getSamples(initialRender: false, startFrame: 0, numOutFrames: maxLayerWidth, dsFactor: dsFactor, clientRef: 0, samplesCB: renderSamples)
+        ssd.getSamples(initialRender: false, startFrame: 0, numOutFrames: AVAudioFrameCount(maxLayerWidth), dsFactor: dsFactor, clientRef: 0, samplesCB: renderSamples)
     }
     
     //

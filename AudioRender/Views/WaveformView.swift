@@ -1,6 +1,6 @@
 //
 //  WaveformView.swift
-//  AudioRender
+//  AudioRenderAaya Lolo-44-MP3-128
 //
 //  Created by Andrew Coad on 08/03/2019.
 //  Copyright © 2019 ___EKKO-TECH LTD___. All rights reserved.
@@ -22,10 +22,11 @@ let kDsFactorMaximum            = true
 //
 // Layer Names
 //
-let kLayerNameGradient      = "G"
-let kLayerNameMask          = "M"
-let kLayerNameWaveform      = "W"
-let kLayerNameCursor        = "C"
+let kLayerNameGradient          = "G"
+let kLayerNameMask              = "M"
+let kLayerNameWaveform          = "W"
+let kLayerNameCursorSlider      = "CSL"
+let kLayerNameCursorScroller    = "CSC"
 
 //
 // Layer Indexes
@@ -57,16 +58,24 @@ class WaveformView: UIView {
     //
     // MARK: - Private properties
     //
-    let cursorLayer = CAShapeLayer()
-    let maskLayer = CAShapeLayer()
-    let waveformLayer = CAShapeLayer()
-    let gradientLayer = CAGradientLayer()
-    let layerDelegate = WaveformViewLayerDelegate()
-    
+    internal let cursorLayer = CAShapeLayer()
+    internal let maskLayer = CAShapeLayer()
+    internal let waveformLayer = CAShapeLayer()
+    internal let gradientLayer = CAGradientLayer()
+    internal let layerDelegate = WaveformViewLayerDelegate()
+    internal var maxLayerWidth:CGFloat = 0.0
+
     //
     // MARK: - Public properties
     //
     public var sampleBuffer:SampleBuffer? = nil
+
+    //
+    // MARK: - Initialisation
+    //
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
     
     //
     // MARK: - Geometry management
@@ -74,6 +83,7 @@ class WaveformView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         adjustLayerGeometry()
+        maxLayerWidth = getMaxLayerWidth()
     }
     
     private func adjustLayerGeometry() {
@@ -88,7 +98,33 @@ class WaveformView: UIView {
             this.setNeedsDisplay()
         }
     }
-    
+
+    //
+    // MARK: - Private methods
+    //
+    private func getMaxLayerWidth() -> CGFloat {
+        
+        let thisDevice = UIDevice()
+        var baseWidth = UIScreen.main.bounds.width > UIScreen.main.bounds.height ? UIScreen.main.bounds.width : UIScreen.main.bounds.height
+        
+        if thisDevice.userInterfaceIdiom == .phone {
+            if #available(iOS 11.0, *) {
+                let vc = UIApplication.shared.keyWindow!.rootViewController as! RootViewController
+                let insets = vc.view.safeAreaInsets
+                if insets.top > 0.0 && insets.bottom > 0.0 {
+                    baseWidth -= insets.top > insets.bottom ? (insets.top * 2) : (insets.bottom * 2)
+                }
+                else if insets.left > 0.0 && insets.right > 0.0 {
+                    baseWidth -= insets.left > insets.right ? (insets.left * 2) : (insets.right * 2)
+                }
+            }
+        }
+        return baseWidth
+    }
+
+    //
+    // MARK: - Public methods
+    //
     func onSamples(sBuff:SampleBuffer) {
         // Implement in sub-class
     }
@@ -125,8 +161,14 @@ class WaveformViewLayerDelegate: NSObject, CALayerDelegate {
                 }
             }
             
-        case kLayerNameCursor:
-            break
+        case kLayerNameCursorSlider, kLayerNameCursorScroller:
+            let lyr = layer as? CAShapeLayer
+            let path = CGMutablePath()
+            let xOffset:CGFloat = Int(layer.bounds.width) % 2 == 0 ? 0.5 : 0.0
+            let xPosition:CGFloat = layer.name == kLayerNameCursorSlider ? 0.0 : layer.bounds.width / 2
+            path.move(to: CGPoint(x: xPosition + xOffset, y: 0.0))
+            path.addLine(to: CGPoint(x: xPosition + xOffset, y: layer.bounds.height))
+            lyr?.path = path
         default:
             break
         }

@@ -93,14 +93,14 @@ let scrollerViewPalette = ColourPalette(gradientColours:colourThemeSunset,
                                         waveformBackgroundColour: UIColor(rgb: kColourClear, alpha: 0.0).cgColor,
                                         waveformLineColour: UIColor(rgb: kColourBlueDarkBg, alpha: 1.0).cgColor,
                                         cursorBackgroundColour: UIColor(rgb: kColourClear, alpha: 0.0).cgColor,
-                                        cursorLineColour: UIColor(rgb: kColourOrangeHeavy, alpha: 1.0).cgColor)
+                                        cursorLineColour: UIColor(rgb: kColourBrick, alpha: 1.0).cgColor)
 
 let sliderViewPalette = ColourPalette(gradientColours: colourThemeSunset,
                                       gradientBackgroundColour: UIColor(rgb: kColourGreyInactive, alpha: 1.0).cgColor,
                                       waveformBackgroundColour: UIColor(rgb: kColourClear, alpha: 0.0).cgColor,
                                       waveformLineColour: UIColor(rgb: kColourBlueDarkBg, alpha: 1.0).cgColor,
                                       cursorBackgroundColour: UIColor(rgb: kColourClear, alpha: 0.0).cgColor,
-                                      cursorLineColour: UIColor(rgb: kColourOrangeHeavy, alpha: 1.0).cgColor)
+                                      cursorLineColour: UIColor(rgb: kColourBrick, alpha: 1.0).cgColor)
 
 let colourThemeSunset = [UIColor(rgb: kColourSunset1, alpha: 1.0).cgColor,
                          UIColor(rgb: kColourSunset2, alpha: 1.0).cgColor,

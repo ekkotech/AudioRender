@@ -43,6 +43,7 @@ class WaveformViewContainer: UIViewController, SampleRequestProtocol {
         sliderView.sampleSourceDelegate = self
         scrollerView.sampleSourceDelegate = self
         setUpProxySubscriptions()
+
     }
     
     private func setUpProxySubscriptions() {

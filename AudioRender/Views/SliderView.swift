@@ -12,7 +12,6 @@ import AVFoundation
 class SliderView: WaveformView, WaveformRenderProtocol {
     
     let decimation = kDsFactorSlider
-    let maxLayerWidth = UIScreen.main.bounds.width > UIScreen.main.bounds.height ? UIScreen.main.bounds.width : UIScreen.main.bounds.height
     let displayScale = UIScreen.main.scale
     public var sampleSourceDelegate:SampleRequestProtocol? = nil
     private var renderCompletionCallback:(()->())? = nil
@@ -54,7 +53,7 @@ class SliderView: WaveformView, WaveformRenderProtocol {
         cursorLayer.backgroundColor = sliderViewPalette.cursorBackgroundColour
         cursorLayer.strokeColor = sliderViewPalette.cursorLineColour
         cursorLayer.fillColor = sliderViewPalette.cursorLineColour
-        cursorLayer.name = kLayerNameCursor
+        cursorLayer.name = kLayerNameCursorSlider
         cursorLayer.delegate = layerDelegate
     }
     
@@ -75,7 +74,7 @@ class SliderView: WaveformView, WaveformRenderProtocol {
         
         if kDsFactorMaximum {
             // Compresses entire file to width of landscape view
-            ssd.getSamples(initialRender: true, startFrame: 0, numOutFrames: UInt32(maxLayerWidth), dsFactor: kDsFactorUnspecified, clientRef: 0, samplesCB: renderSamples)
+            ssd.getSamples(initialRender: true, startFrame: 0, numOutFrames: AVAudioFrameCount(maxLayerWidth), dsFactor: kDsFactorUnspecified, clientRef: 0, samplesCB: renderSamples)
         }
         else {
             // Compresses entire file by specified compression factor
