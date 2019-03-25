@@ -23,15 +23,15 @@ let strategy:DsStrategy = .maxValue
 //
 // MARK: - Accelerate Framework selection
 //
-let useAccelForDs = false
-let useAccelForMerge = false
-let useAccelForPeakCalc = false
-let useAccelForBuildPoints = false
+let useAccelForDs = true
+let useAccelForMerge = true
+let useAccelForPeakCalc = true
+let useAccelForBuildPoints = true
 
 //
 // Multi-reader
 //
-let useMultiReader                = false
+let useMultiReader                = true
 // Make sure that the block size is an integer multiple of default downsample factor
 // Ideally, both should be powers of 2
 let kBlockSize                  = AVAudioFrameCount(524288)     // 2**19
@@ -87,8 +87,8 @@ class Sampler: NSObject {
         
         index = initialRender ? 0 : 1
         
-        let returnSamples:(SampleBuffer?)->() = { sBuff in
-            if let sb = sBuff { completion(sb) }
+        let returnSamples:(SampleBuffer?)->() = { sampleBuffer in
+            if let sb = sampleBuffer { completion(sb) }
         }
 
         let thisStartFrame = startFrame >= 0 ? startFrame : 0
@@ -141,22 +141,22 @@ class Sampler: NSObject {
         
         var blockId = 0
         
-        let downsample:(_ pb:AVAudioPCMBuffer, _ dsFactor:Int, _ blockId:Int, _ sampBuff:SampleBuffer)->() = { (pb, dsFactor, blockId, sampBuff) in
-            guard let fcd = pb.floatChannelData, let sbfd = sampBuff.floatData else { return }
+        let downsample:(_ frameBuffer:AVAudioPCMBuffer, _ dsFactor:Int, _ blockId:Int, _ sampleBuffer:SampleBuffer)->() = { (fb, dsFactor, blockId, sb) in
+            guard let fcd = fb.floatChannelData, let fd = sb.floatData else { return }
             
             // Downsample buffer
-            for idx in 0..<Int(pb.frameLength / AVAudioFrameCount(dsFactor)) {
+            for idx in 0..<Int(fb.frameLength / AVAudioFrameCount(dsFactor)) {
                 vDSP_maxv(fcd[0] + (idx * Int(dsFactor)), 1, fcd[0] + idx, vDSP_Length(dsFactor))
                 vDSP_maxv(fcd[1] + (idx * Int(dsFactor)), 1, fcd[1] + idx, vDSP_Length(dsFactor))
             }
             // Adjust number of valid frames in pcm buffer
-            pb.frameLength /= AVAudioFrameCount(dsFactor)
+            fb.frameLength /= AVAudioFrameCount(dsFactor)
             // Merge channels and accumulate in sample buffer
             var avg:Float = 0.5
-            let nominalDsLength = Int(pb.frameCapacity) / Int(dsFactor)
+            let nominalDsLength = Int(fb.frameCapacity) / Int(dsFactor)
             let outOffset:Int = nominalDsLength * blockId
-            vDSP_vasm(fcd[0], 1, fcd[1], 1, &avg, sbfd + outOffset, 1, vDSP_Length(pb.frameLength))
-            sampBuff.frameLength += pb.frameLength
+            vDSP_vasm(fcd[0], 1, fcd[1], 1, &avg, fd + outOffset, 1, vDSP_Length(fb.frameLength))
+            sb.frameLength += fb.frameLength
         }
         
         
@@ -167,10 +167,10 @@ class Sampler: NSObject {
                 let audioFile = try AVAudioFile(forReading: assetURL)
                 audioFile.framePosition = Int64(blockSize * UInt32(startBlock))
                 for idx in 0..<numBlocks {
-                    if let pcmb = AVAudioPCMBuffer.init(pcmFormat: pFormat, frameCapacity: blockSize) {
+                    if let fb = AVAudioPCMBuffer.init(pcmFormat: pFormat, frameCapacity: blockSize) {
                         do {
-                            try audioFile.read(into: pcmb, frameCount: blockSize)
-                            submitDownsample(pcmb, dsFactor, startBlock + idx, outBuffer)
+                            try audioFile.read(into: fb, frameCount: blockSize)
+                            submitDownsample(fb, dsFactor, startBlock + idx, outBuffer)
                             blockId += 1
                         }
                         catch {
@@ -197,10 +197,10 @@ class Sampler: NSObject {
         }
         
         
-        func submitDownsample(_ pb:AVAudioPCMBuffer, _ dsFactor:Int, _ blockId:Int, _ sampBuff:SampleBuffer) {
+        func submitDownsample(_ fb:AVAudioPCMBuffer, _ dsFactor:Int, _ blockId:Int, _ sb:SampleBuffer) {
             self.ripFileGroup.enter()
             self.dsConcQueue.async {
-                downsample(pb, dsFactor, blockId, sampBuff)
+                downsample(fb, dsFactor, blockId, sb)
                 self.ripFileGroup.leave()
             }
         }
@@ -210,10 +210,10 @@ class Sampler: NSObject {
         
         // Allocate sample buffer large enough for downsampled frames
         let thisOutFrames = assetLength / UInt32(dsFactor)
-        let sBuff = SampleBuffer.init(capacity: thisOutFrames)
-        if let sb = sBuff { sb.peak = _peak }
+        let sampleBuffer = SampleBuffer.init(capacity: thisOutFrames)
+        if let sb = sampleBuffer { sb.peak = _peak }
         
-        guard let pf = processingFormat, let sb = sBuff, let sbfd = sb.floatData else { completion(nil); return }
+        guard let pf = processingFormat, let sb = sampleBuffer, let fd = sb.floatData else { completion(nil); return }
         
         // Round down frames per reader to integer multiple of block size
         var framesPerReader = (assetLength / UInt32(numReaders)) - ((assetLength / UInt32(numReaders)) % kBlockSize)
@@ -232,7 +232,7 @@ class Sampler: NSObject {
         
         ripFileGroup.notify(queue: DispatchQueue.main, execute: {
             var peak:Float = 1.0
-            vDSP_maxv(sbfd, 1, &peak, vDSP_Length(sb.frameLength))
+            vDSP_maxv(fd, 1, &peak, vDSP_Length(sb.frameLength))
             sb.peak = peak
             self.buildPointArray(sampleBuffer: sb)
             print("Async file duration: Ds: \(String(dsFactor)) \(CACurrentMediaTime() - ripStartTime)")
@@ -246,18 +246,18 @@ class Sampler: NSObject {
         
         af.framePosition = startFrame
         
-        if let pcmb = AVAudioPCMBuffer.init(pcmFormat: pf, frameCapacity: numOutFrames * UInt32(dsFactor)), let sBuff = SampleBuffer.init(capacity: numOutFrames) {
+        if let fb = AVAudioPCMBuffer.init(pcmFormat: pf, frameCapacity: numOutFrames * UInt32(dsFactor)), let sb = SampleBuffer.init(capacity: numOutFrames) {
             
-            sBuff.peak = _peak
+            sb.peak = _peak
             do {
                 let readFileStartTime = CACurrentMediaTime()
-                try af.read(into: pcmb, frameCount: numOutFrames * UInt32(dsFactor))
+                try af.read(into: fb, frameCount: numOutFrames * UInt32(dsFactor))
                 timeStats.setTimeParameter(index: index, key: "fileread", timing: (comment: "", start: readFileStartTime, end: CACurrentMediaTime()))
-                downsample(frameBuffer: pcmb, dsFactor: dsFactor)
-                merge(frameBuffer: pcmb, sampleBuffer: sBuff)
-                calcPeak(sampleBuffer: sBuff)
-                buildPointArray(sampleBuffer: sBuff)
-                completion(sBuff)
+                downsample(frameBuffer: fb, dsFactor: dsFactor)
+                merge(frameBuffer: fb, sampleBuffer: sb)
+                calcPeak(sampleBuffer: sb)
+                buildPointArray(sampleBuffer: sb)
+                completion(sb)
             }
             catch {
                 Logger.debug("Error reading audio file on thread")
@@ -298,6 +298,10 @@ class Sampler: NSObject {
                 // Insert Accelerate downsample code here
                 //
 
+                for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
+                    vDSP_maxmgv(fcd[0] + (idx * Int(dsFactor)), 1, fcd[0] + idx, vDSP_Length(dsFactor))
+                    vDSP_maxmgv(fcd[1] + (idx * Int(dsFactor)), 1, fcd[1] + idx, vDSP_Length(dsFactor))
+                }
             }
         case (.avgValue, false):
             timing(index: index, key: "downsample", comment: "", stats: timeStats) {
@@ -357,6 +361,8 @@ class Sampler: NSObject {
                     //
                     // Insert Accelerate merge code here
                     //
+                    var avg:Float = 0.5
+                    vDSP_vasm(fcd[0], 1, fcd[1], 1, &avg, sfd, 1, vDSP_Length(frameLength))
                 }
             }
             sampleBuffer.frameLength = frameLength
@@ -403,6 +409,19 @@ class Sampler: NSObject {
                 //
                 // Insert Accelerate build point array code here
                 //
+                ptArray.withUnsafeBufferPointer { buffer in
+                    guard let bp = buffer.baseAddress else { return }
+                    
+                    let doublePtr = UnsafeMutableRawPointer(mutating: bp).bindMemory(to: Double.self, capacity: Int(sampleBuffer.frameLength) * 2)
+                    var startValue:Double = 0.0
+                    var incrBy:Double = 1.0
+                    vDSP_vrampD(&startValue, &incrBy, doublePtr, 2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vrampD(&startValue, &incrBy, doublePtr + (Int(sampleBuffer.frameLength) * 4) - 2, -2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vspdp(fd, 1, doublePtr + 1, 2, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vneg(fd, 1, fd, 1, vDSP_Length(sampleBuffer.frameLength))
+                    vDSP_vspdp(fd, 1, doublePtr + (Int(sampleBuffer.frameLength) * 4) - 1, -2, vDSP_Length(sampleBuffer.frameLength))
+
+                }
             }
         }
         sampleBuffer.points = ptArray

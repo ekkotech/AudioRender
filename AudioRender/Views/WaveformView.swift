@@ -44,12 +44,12 @@ let kWaveformYScale         = CGFloat(0.9)
 //
 enum RenderConfig:String {
     case basic = "Basic"            // Individual lines scaled and drawn sequentially
-    case linkLines = "Link Lines"   // Joined lines inserted into path, scaled by transform
+    case linkLines = "Link Lines"   // Joined lines inserted into path, scale on the fly
     case fill = "Fill"              // Outline inserted into path, scaled by transform and filled
     case mask = "Mask"              // Outline inserted into path, scaled by transform and masked
 }
 
-let renderConfig:RenderConfig   = .basic
+let renderConfig:RenderConfig   = .mask
 let shouldNormalise             = false
 
 class WaveformView: UIView {
@@ -268,8 +268,12 @@ extension WaveformViewLayerDelegate {
             //
             // Add CGAffineTransform code here
             //
-            let tf = CGAffineTransform.identity
-
+//            let tf = CGAffineTransform.identity
+            var tf = CGAffineTransform.identity
+            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+            tf = tf.translatedBy(x: 0.5, y: layer.bounds.height / 2)
+            tf = tf.scaledBy(x: layer.bounds.width / CGFloat((sb.points.count) / 2), y: (layer.bounds.height / 2) * yScale)
+            
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 path.addLines(between: sb.points, transform: tf)
                 path.closeSubpath()
