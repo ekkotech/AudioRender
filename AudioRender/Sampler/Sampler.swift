@@ -35,7 +35,7 @@ let useMultiReader                = true
 // Make sure that the block size is an integer multiple of default downsample factor
 // Ideally, both should be powers of 2
 let kBlockSize                  = AVAudioFrameCount(524288)     // 2**19
-let kNumReaders                 = 2
+let kNumReaders                 = 3
 
 class Sampler: NSObject {
     
@@ -215,19 +215,21 @@ class Sampler: NSObject {
         
         guard let pf = processingFormat, let sb = sampleBuffer, let fd = sb.floatData else { completion(nil); return }
         
+        // Round down block size to integer multiple of downsample factor
+        let thisBlockSize = kBlockSize - (kBlockSize % UInt32(dsFactor))
         // Round down frames per reader to integer multiple of block size
-        var framesPerReader = (assetLength / UInt32(numReaders)) - ((assetLength / UInt32(numReaders)) % kBlockSize)
-        var blocksPerReader =  Int(framesPerReader / kBlockSize)
+        var framesPerReader = (assetLength / UInt32(numReaders)) - ((assetLength / UInt32(numReaders)) % thisBlockSize)
+        var blocksPerReader =  Int(framesPerReader / thisBlockSize)
         
         for idx in 0..<numReaders {
             let startBlock = Int(blocksPerReader) * idx
             if idx == (numReaders - 1) {
                 // Adjust number of frames, number of blocks for the last reader
                 framesPerReader = assetLength - (framesPerReader * UInt32(idx))
-                blocksPerReader = Int((framesPerReader % kBlockSize) != 0 ? (framesPerReader / kBlockSize) + 1 : framesPerReader / kBlockSize)
+                blocksPerReader = Int((framesPerReader % thisBlockSize) != 0 ? (framesPerReader / thisBlockSize) + 1 : framesPerReader / thisBlockSize)
             }
             
-            submitReadFile(assetURL: assetURL, pFormat: pf, sourceLength: assetLength, dsFactor: dsFactor, blockSize: kBlockSize, startBlock: startBlock, numBlocks: blocksPerReader, outBuffer: sb)
+            submitReadFile(assetURL: assetURL, pFormat: pf, sourceLength: assetLength, dsFactor: dsFactor, blockSize: thisBlockSize, startBlock: startBlock, numBlocks: blocksPerReader, outBuffer: sb)
         }
         
         ripFileGroup.notify(queue: DispatchQueue.main, execute: {
