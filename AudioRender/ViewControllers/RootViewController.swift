@@ -61,7 +61,8 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
          ("Aaya Lolo 48kHz 192kbps mp3", "Aaya Lolo-48-MP3-192", "mp3"),
          ("Aaya Lolo 48kHz, wav", "Aaya Lolo-48-WAV", "wav"),
          ("Aaya Lolo 48kHz 192kbps AAC", "Aaya Lolo-48-AAC-192", "m4a"),
-         ("Able Mable 44.1kHz 128kbps wav", "Able Mable (LP Version)", "wav")]
+         ("Able Mable 44.1kHz 128kbps wav", "Able Mable (LP Version)", "wav"),
+         ("Groove Blues 44.1kHz mp3", "Groove Blues", "mp3")]
     
     //
     // Sample buffers

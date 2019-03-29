@@ -14,19 +14,21 @@ import Accelerate
 class SampleBuffer: NSObject {
     
     private let _sBuff:UnsafeMutablePointer<Float>?
+    private let _fsd:UnsafePointer<UnsafeMutablePointer<Float>>?
+    private var _fData:UnsafeMutablePointer<UnsafeMutablePointer<Float>>
     private var _points:Array<CGPoint> = []
     private var _capacity:AVAudioFrameCount = 0
-    private var _length:AVAudioFrameCount = 0
     private var _extrema:Float = 0.0
     private var _peak:Float = 1.0
-    
+
+    public let frameLength = AtomicUInt32(0)
+
     var floatData:UnsafeMutablePointer<Float>? {
         get { return _sBuff }
     }
     
-    var frameLength:AVAudioFrameCount {
-        get { return _length }
-        set { _length = newValue }
+    var floatSampleData:UnsafePointer<UnsafeMutablePointer<Float>>? {
+        get { return _fsd }
     }
     
     var frameCapacity:AVAudioFrameCount {
@@ -45,26 +47,21 @@ class SampleBuffer: NSObject {
     
     init?(capacity:AVAudioFrameCount) {
         _sBuff = UnsafeMutablePointer.allocate(capacity: Int(capacity))
+        _fData = UnsafeMutablePointer<UnsafeMutablePointer<Float>>.allocate(capacity: 2)
+        _fData[0] = UnsafeMutablePointer<Float>.allocate(capacity: Int(capacity))
+        _fData[1] = UnsafeMutablePointer<Float>.allocate(capacity: Int(capacity))
+        _fsd = UnsafePointer(_fData)
+        
         if _sBuff == nil {
             return nil
         }
         _capacity = capacity
-        _length = 0
-    }
-    
-    func append(source:UnsafePointer<Float>, length:AVAudioFrameCount) {
-        guard let sb = _sBuff else { return }
-        let xferCount = (_length + length > _capacity) ? (_capacity - _length) : length
-        for idx in 0..<Int(xferCount) {
-            sb[idx] = source[idx]
-        }
-        _length += xferCount
     }
     
     func updatePeak() -> Float {
 
         if let sb = _sBuff {
-            vDSP_maxv(sb, 1, &_extrema, vDSP_Length(_length))
+            vDSP_maxv(sb, 1, &_extrema, vDSP_Length(frameLength.value))
             _peak = _extrema != 0.0 ? _extrema : 1.0
             return _peak
         }
@@ -76,3 +73,52 @@ class SampleBuffer: NSObject {
         if _sBuff != nil { _sBuff?.deallocate() }
     }
 }
+
+class AtomicUInt32 {
+    private let _atomQ = DispatchQueue(label: "aq")
+    private var _value:UInt32 = 0
+//    private let lock = ReadWriteLock()
+    
+    init(_ newValue:UInt32) {
+        self._value = newValue
+    }
+    
+    var value:UInt32 {
+        get {
+            return _value
+        }
+    }
+    
+    func mutate(to newValue:UInt32) {
+        _atomQ.sync {
+            _value = newValue
+        }
+    }
+    
+    func increment(by newValue:UInt32) {
+        _atomQ.sync {
+            _value = _value + newValue
+        }
+    }
+}
+
+//final class ReadWriteLock {
+//    private var rwlock: pthread_rwlock_t = {
+//        var rwlock = pthread_rwlock_t()
+//        pthread_rwlock_init(&rwlock, nil)
+//        return rwlock
+//    }()
+//
+//    func writeLock() {
+//        pthread_rwlock_wrlock(&rwlock)
+//    }
+//
+//    func readLock() {
+//        pthread_rwlock_rdlock(&rwlock)
+//    }
+//
+//    func unlock() {
+//        pthread_rwlock_unlock(&rwlock)
+//    }
+//}
+

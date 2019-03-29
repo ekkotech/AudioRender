@@ -49,7 +49,7 @@ enum RenderConfig:String {
     case mask = "Mask"              // Outline inserted into path, scaled by transform and masked
 }
 
-let renderConfig:RenderConfig   = .basic
+let renderConfig:RenderConfig   = .mask
 let shouldNormalise             = false
 
 class WaveformView: UIView {
@@ -180,7 +180,7 @@ extension WaveformViewLayerDelegate {
     func renderWithMask(layer: CALayer, in ctx: CGContext, parentView: WaveformView?) {
         
         guard let pv = parentView, let mask = layer.mask as? CAShapeLayer, let sb = pv.sampleBuffer else { return }
-        guard sb.frameLength > 0 else { return }
+        guard sb.frameLength.value > 0 else { return }
 
         let index = pv is SliderView ? 0 : 1
         let path = CGMutablePath()
@@ -202,7 +202,7 @@ extension WaveformViewLayerDelegate {
     
     func renderWaveform(layer: CALayer, in ctx: CGContext, parentView: WaveformView?) {
         
-        guard let pv = parentView, let sb = pv.sampleBuffer, sb.frameLength > 0 else { return }
+        guard let pv = parentView, let sb = pv.sampleBuffer, sb.frameLength.value > 0 else { return }
         
         let index = pv is SliderView ? 0 : 1
 
@@ -219,14 +219,15 @@ extension WaveformViewLayerDelegate {
 
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 let yTranslation:CGFloat = layer.bounds.height / 2
-                let xScale = layer.bounds.size.width / CGFloat(sb.frameLength)
+                let xScale = layer.bounds.size.width / CGFloat(sb.frameLength.value)
                 let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformYScale
                 
                 for idx in 0..<sb.points.count / 2 {
                     let xScaled = CGFloat(xScale * CGFloat(idx))
-                    let yScaled = CGFloat(yScale * sb.points[idx].y)
-                    path.move(to: CGPoint(x: xScaled + 0.5, y: yTranslation - yScaled))
-                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: yTranslation + yScaled))
+                    let yUpperScaled = CGFloat(yScale * sb.points[idx].y)
+                    let yLowerScaled = CGFloat(yScale * sb.points[(sb.points.count - 1) - idx].y)
+                    path.move(to: CGPoint(x: xScaled + 0.5, y: yTranslation - yUpperScaled))
+                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: yTranslation - yLowerScaled))
                 }
             }
             
@@ -241,15 +242,16 @@ extension WaveformViewLayerDelegate {
             
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 let yTranslation:CGFloat = layer.bounds.height / 2
-                let xScale = layer.bounds.size.width / CGFloat(sb.frameLength)
+                let xScale = layer.bounds.size.width / CGFloat(sb.frameLength.value)
                 let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformYScale
                 path.move(to: CGPoint(x: 0.0, y: yTranslation))
                 for idx in 0..<sb.points.count / 2 {
                     let xScaled = CGFloat(xScale * CGFloat(idx))
-                    let yScaled = CGFloat(yScale * sb.points[idx].y)
+                    let yUpperScaled = CGFloat(yScale * sb.points[idx].y)
+                    let yLowerScaled = CGFloat(yScale * sb.points[(sb.points.count - 1) - idx].y)
                     let modifier = idx % 2 == 0 ? 1 : -1
-                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: (yTranslation - (yScaled * CGFloat(modifier)))))
-                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: (yTranslation + (yScaled * CGFloat(modifier)))))
+                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: (yTranslation - (yUpperScaled * CGFloat(modifier)))))
+                    path.addLine(to: CGPoint(x: xScaled + 0.5, y: (yTranslation - (yLowerScaled * CGFloat(modifier)))))
                     if idx == (sb.points.count / 2) - 1 {
                         path.addLine(to: CGPoint(x: xScaled + 0.5, y: yTranslation))
                     }
