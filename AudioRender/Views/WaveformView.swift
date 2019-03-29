@@ -43,10 +43,10 @@ let kWaveformYScale         = CGFloat(0.9)
 // Rendering control
 //
 enum RenderConfig:String {
-    case basic = "Basic"            // Individual lines scaled and drawn sequentially
-    case linkLines = "Link Lines"   // Joined lines inserted into path, scale on the fly
-    case fill = "Fill"              // Outline inserted into path, scaled by transform and filled
-    case mask = "Mask"              // Outline inserted into path, scaled by transform and masked
+    case basic          = "Basic"       // Individual lines inserted into pth, scale on-the-fly
+    case linkLines      = "Link Lines"  // Joined lines inserted into path, scale on-the-fly
+    case fill           = "Fill"        // Outline inserted into path, scaled by transform and filled
+    case mask           = "Mask"        // Outline inserted into path, scaled by transform and masked
 }
 
 let renderConfig:RenderConfig   = .mask
