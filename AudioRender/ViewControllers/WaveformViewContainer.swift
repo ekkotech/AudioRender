@@ -74,8 +74,6 @@ class WaveformViewContainer: UIViewController, SampleRequestProtocol {
         
         func samplesReturned(sBuff:SampleBuffer) {
             if initialRender {
-                // Update peak values
-                sampler.peak = sBuff.updatePeak()
                 // Render scroller
                 onRenderInitialWaveform.fire(.scroller)
             }
