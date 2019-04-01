@@ -150,8 +150,6 @@ class Sampler: NSObject {
             let outOffset:Int = nominalOutSamples * blockId
 
             // Downsample buffer
-            // Only max value downsampling is implemented for async reader - strategy is ignored
-            // Implement other stategies if required
             switch strategy {
             case .maxValue:
                 for idx in 0..<thisOutSamples {
@@ -408,9 +406,7 @@ class Sampler: NSObject {
             // Insert Accelerate merge code here
             //
             var avg:Float = 0.5
-//            var invert:Float = -1.0
             vDSP_vasm(fsd[0], 1, fsd[1], 1, &avg, fsd[0], 1, vDSP_Length(sampleCount))
-//            vDSP_vsmul(fsd[0] + outOffset, 1, &invert, fsd[1] + outOffset, 1, vDSP_Length(sampleCount))
             vDSP_vneg(fsd[0], 1, fsd[1], 1, vDSP_Length(sampleCount))
         }
     }

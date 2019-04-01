@@ -74,21 +74,12 @@ class AtomicUInt32 {
         _sema.wait()
         _value = newValue
         _sema.signal()
-//        _atomQ.sync {
-//            _value = newValue
-//        }
     }
     
     func increment(by newValue:UInt32) {
-//        let start = CACurrentMediaTime()
         _sema.wait()
-//        print("In sema")
         _value += newValue
         _sema.signal()
-//        print("Sema done: \(CACurrentMediaTime() - start)")
-//        _atomQ.sync {
-//            _value += newValue
-//        }
     }
 }
 
