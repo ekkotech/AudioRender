@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import Accelerate
 
 enum RenderTarget {
     case slider
@@ -72,12 +73,19 @@ class WaveformViewContainer: UIViewController, SampleRequestProtocol {
     //
     func getSamples(initialRender:Bool, startFrame:AVAudioFramePosition, numOutFrames:AVAudioFrameCount, dsFactor:Int, clientRef:Int, samplesCB:@escaping(SampleBuffer)->()) {
         
-        func samplesReturned(sBuff:SampleBuffer) {
+        func samplesReturned(sampleBuffer:SampleBuffer) {
             if initialRender {
+                if let fsd = sampleBuffer.floatSampleData {
+                    // Calculate peak value (of entire file)
+                    var thisPeak:Float = 1.0
+                    vDSP_maxv(fsd[0], 1, &thisPeak, vDSP_Length(sampleBuffer.frameLength.value))
+                    sampleBuffer.peak = thisPeak
+                    sampler.peak = thisPeak
+                }
                 // Render scroller
                 onRenderInitialWaveform.fire(.scroller)
             }
-            samplesCB(sBuff)
+            samplesCB(sampleBuffer)
         }
         
         requestQueue.async {

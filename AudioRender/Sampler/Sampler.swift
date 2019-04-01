@@ -150,21 +150,41 @@ class Sampler: NSObject {
             let outOffset:Int = nominalOutSamples * blockId
 
             // Downsample buffer
-            for idx in 0..<thisOutSamples {
-                self.downsample(frameBuffer: fb, sampleBuffer: sb, dsFactor: dsFactor, outOffset: outOffset)
+            // Only max value downsampling is implemented for async reader - strategy is ignored
+            // Implement other stategies if required
+            switch strategy {
+            case .maxValue:
+                for idx in 0..<thisOutSamples {
+                    vDSP_maxmgv(fcd[0] + (idx * dsFactor), 1, fsd[0] + outOffset + idx, vDSP_Length(dsFactor))
+                    vDSP_maxmgv(fcd[1] + (idx * dsFactor), 1, fsd[1] + outOffset + idx, vDSP_Length(dsFactor))
+                }
+            case .minMaxValue:
+                for idx in 0..<thisOutSamples {
+                    vDSP_maxv(fcd[0] + (idx * dsFactor), 1, fsd[0] + outOffset + idx, vDSP_Length(dsFactor))
+                    vDSP_minv(fcd[1] + (idx * dsFactor), 1, fsd[1] + outOffset + idx, vDSP_Length(dsFactor))
+                }
+            case .avgValue:
+                for idx in 0..<thisOutSamples {
+                    vDSP_meamgv(fcd[0] + (idx * dsFactor), 1, fsd[0] + outOffset + idx, vDSP_Length(dsFactor))
+                    vDSP_meamgv(fcd[1] + (idx * dsFactor), 1, fsd[1] + outOffset + idx, vDSP_Length(dsFactor))
+                }
+            case .sampleValue:
+                for idx in 0..<thisOutSamples {
+                    vDSP_maxmgv(fcd[0] + (idx * dsFactor), 1, fsd[0] + outOffset + idx, 1)
+                    vDSP_maxmgv(fcd[1] + (idx * dsFactor), 1, fsd[1] + outOffset + idx, 1)
+                }
             }
-            
             // Adjust number of valid frames in sample buffer
             sb.frameLength.increment(by: AVAudioFrameCount(thisOutSamples))   // Atomic
-            
-            // Merge channels and accumulate in sample buffer (no merge for minMax downsampling)
+
+            // Merge channels and accumulate in sample buffer
             if strategy != .minMaxValue {
                 var avg:Float = 0.5
                 var invert:Float = -1.0
                 vDSP_vasm(fsd[0] + outOffset, 1, fsd[1] + outOffset, 1, &avg, fsd[0] + outOffset, 1, vDSP_Length(thisOutSamples))
-                vDSP_vsmul(fsd[0] + outOffset, 1, &invert, fsd[1] + outOffset, 1, vDSP_Length(thisOutSamples))
+                vDSP_vneg(fsd[0] + outOffset, 1, fsd[1] + outOffset, 1, vDSP_Length(thisOutSamples))
             }
-        }
+       }
         
         let readFile:(_ assetURL: URL, _ pFormat: AVAudioFormat, _ sourceLength: AVAudioFrameCount, _ dsFactor: Int, _ blockSize: AVAudioFrameCount, _ startBlock: Int, _ numBlocks: Int, _ outBuffer: SampleBuffer)->() = {audioFile, pFormat, sourceLength, dsFactor, blockSize, startBlock, numBlocks, outBuffer in
             
@@ -238,7 +258,7 @@ class Sampler: NSObject {
         }
         
         ripFileGroup.notify(queue: DispatchQueue.main, execute: {
-            self.calcPeak(sampleBuffer: sb)
+            // Build point array
             self.buildPointArray(sampleBuffer: sb)
             print("Async file duration: Ds: \(String(dsFactor)) \(CACurrentMediaTime() - ripStartTime)")
             completion(sb)
@@ -260,7 +280,7 @@ class Sampler: NSObject {
                 timeStats.setTimeParameter(index: index, key: "fileread", timing: (comment: "", start: readFileStartTime, end: CACurrentMediaTime()))
                 
                 timing(index: index, key: "downsample", comment: "", stats: timeStats) {
-                    downsample(frameBuffer: fb, sampleBuffer: sb, dsFactor: dsFactor, outOffset: 0)
+                    downsample(frameBuffer: fb, sampleBuffer: sb, dsFactor: dsFactor)
                 }
                 
                 // Adjust sample buffer frame length to number of downsampled frames
@@ -292,7 +312,7 @@ class Sampler: NSObject {
     //
     // MARK: - Support primitives
     //
-    private func downsample(frameBuffer:AVAudioPCMBuffer, sampleBuffer:SampleBuffer, dsFactor:Int, outOffset:Int) {
+    private func downsample(frameBuffer:AVAudioPCMBuffer, sampleBuffer:SampleBuffer, dsFactor:Int) {
         guard let fcd = frameBuffer.floatChannelData, let fsd = sampleBuffer.floatSampleData else { return }
 
         switch (strategy, useAccelForDs) {
@@ -310,16 +330,16 @@ class Sampler: NSObject {
                         rightMaxValue = abs(fcd[1][(idx * Int(dsFactor)) + jdx])
                     }
                 }
-                fsd[0][idx + outOffset] = leftMaxValue
-                fsd[1][idx + outOffset] = rightMaxValue
+                fsd[0][idx] = leftMaxValue
+                fsd[1][idx] = rightMaxValue
             }
         case (.maxValue, true):
             //
             // Insert Accelerate downsample code here
             //
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                vDSP_maxmgv(fcd[0] + (idx * Int(dsFactor)), 1, fsd[0] + outOffset + idx, vDSP_Length(dsFactor))
-                vDSP_maxmgv(fcd[1] + (idx * Int(dsFactor)), 1, fsd[1] + outOffset + idx, vDSP_Length(dsFactor))
+                vDSP_maxmgv(fcd[0] + (idx * dsFactor), 1, fsd[0] + idx, vDSP_Length(dsFactor))
+                vDSP_maxmgv(fcd[1] + (idx * dsFactor), 1, fsd[1] + idx, vDSP_Length(dsFactor))
             }
         case (.minMaxValue, false):
             var leftMaxValue:Float
@@ -335,13 +355,13 @@ class Sampler: NSObject {
                         rightMinValue = fcd[1][(idx * Int(dsFactor)) + jdx]
                     }
                 }
-                fsd[0][idx + outOffset] = leftMaxValue
-                fsd[1][idx + outOffset] = rightMinValue
+                fsd[0][idx] = leftMaxValue
+                fsd[1][idx] = rightMinValue
             }
         case (.minMaxValue, true):
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                vDSP_maxv(fcd[0] + (idx * Int(dsFactor)), 1, fsd[0] + outOffset + idx, vDSP_Length(dsFactor))
-                vDSP_minv(fcd[1] + (idx * Int(dsFactor)), 1, fsd[1] + outOffset + idx, vDSP_Length(dsFactor))
+                vDSP_maxv(fcd[0] + (idx * dsFactor), 1, fsd[0] + idx, vDSP_Length(dsFactor))
+                vDSP_minv(fcd[1] + (idx * dsFactor), 1, fsd[1] + idx, vDSP_Length(dsFactor))
             }
         case (.avgValue, false):
             var leftAvgValue:Float
@@ -353,23 +373,23 @@ class Sampler: NSObject {
                     leftAvgValue += abs(fcd[0][(idx * Int(dsFactor)) + jdx])
                     rightAvgValue += abs(fcd[1][(idx * Int(dsFactor)) + jdx])
                 }
-                fsd[0][idx + outOffset] = leftAvgValue / Float(dsFactor)
-                fsd[1][idx + outOffset] = rightAvgValue / Float(dsFactor)
+                fsd[0][idx] = leftAvgValue / Float(dsFactor)
+                fsd[1][idx] = rightAvgValue / Float(dsFactor)
             }
         case (.avgValue, true):
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                vDSP_meamgv(fcd[0] + (idx * Int(dsFactor)), 1, fsd[0] + outOffset + idx, vDSP_Length(dsFactor))
-                vDSP_meamgv(fcd[1] + (idx * Int(dsFactor)), 1, fsd[1] + outOffset + idx, vDSP_Length(dsFactor))
+                vDSP_meamgv(fcd[0] + (idx * dsFactor), 1, fsd[0] + idx, vDSP_Length(dsFactor))
+                vDSP_meamgv(fcd[1] + (idx * dsFactor), 1, fsd[1] + idx, vDSP_Length(dsFactor))
             }
         case (.sampleValue, false):
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                fsd[0][idx + outOffset] = abs(fcd[0][idx * Int(dsFactor)])
-                fsd[1][idx + outOffset] = abs(fcd[1][idx * Int(dsFactor)])
+                fsd[0][idx] = abs(fcd[0][idx * Int(dsFactor)])
+                fsd[1][idx] = abs(fcd[1][idx * Int(dsFactor)])
             }
         case (.sampleValue, true):
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                vDSP_maxmgv(fcd[0] + (idx * Int(dsFactor)), 1, fsd[0] + outOffset + idx, 1)
-                vDSP_maxmgv(fcd[1] + (idx * Int(dsFactor)), 1, fsd[1] + outOffset + idx, 1)
+                vDSP_maxmgv(fcd[0] + (idx * dsFactor), 1, fsd[0] + idx, 1)
+                vDSP_maxmgv(fcd[1] + (idx * dsFactor), 1, fsd[1] + idx, 1)
             }
         }
     }
@@ -380,17 +400,18 @@ class Sampler: NSObject {
         switch useAccelForMerge {
         case false:
             for idx in 0..<Int(sampleBuffer.frameLength.value) {
-                fsd[0][idx + outOffset] = (fsd[0][idx + outOffset] + fsd[1][idx + outOffset]) / Float(2.0)
-                fsd[1][idx + outOffset] = -fsd[0][idx + outOffset]
+                fsd[0][idx] = (fsd[0][idx] + fsd[1][idx]) / Float(2.0)
+                fsd[1][idx] = -fsd[0][idx]
             }
         case true:
             //
             // Insert Accelerate merge code here
             //
             var avg:Float = 0.5
-            var invert:Float = -1.0
-            vDSP_vasm(fsd[0] + outOffset, 1, fsd[1] + outOffset, 1, &avg, fsd[0] + outOffset, 1, vDSP_Length(sampleCount))
-            vDSP_vsmul(fsd[0] + outOffset, 1, &invert, fsd[1] + outOffset, 1, vDSP_Length(sampleCount))
+//            var invert:Float = -1.0
+            vDSP_vasm(fsd[0], 1, fsd[1], 1, &avg, fsd[0], 1, vDSP_Length(sampleCount))
+//            vDSP_vsmul(fsd[0] + outOffset, 1, &invert, fsd[1] + outOffset, 1, vDSP_Length(sampleCount))
+            vDSP_vneg(fsd[0], 1, fsd[1], 1, vDSP_Length(sampleCount))
         }
     }
     

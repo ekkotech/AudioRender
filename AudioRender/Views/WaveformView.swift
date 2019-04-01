@@ -43,7 +43,7 @@ let kWaveformYScale         = CGFloat(0.9)
 // Rendering control
 //
 enum RenderConfig:String {
-    case basic          = "Basic"       // Individual lines inserted into pth, scale on-the-fly
+    case lines          = "Lines"       // Individual lines inserted into pth, scale on-the-fly
     case linkLines      = "Link Lines"  // Joined lines inserted into path, scale on-the-fly
     case fill           = "Fill"        // Outline inserted into path, scaled by transform and filled
     case mask           = "Mask"        // Outline inserted into path, scaled by transform and masked
@@ -210,7 +210,7 @@ extension WaveformViewLayerDelegate {
         ctx.setFillColor(sliderViewPalette.waveformLineColour)
         ctx.setLineWidth(kLineWidth)
         
-        if renderConfig == .basic {
+        if renderConfig == .lines {
             // Render using points array...
             // For "basic" rendering, only the first half of the points buffer is required
             guard sb.points.count > 0 else { return }
@@ -270,12 +270,11 @@ extension WaveformViewLayerDelegate {
             //
             // Add CGAffineTransform code here
             //
-//            let tf = CGAffineTransform.identity
             var tf = CGAffineTransform.identity
             let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
             tf = tf.translatedBy(x: 0.5, y: layer.bounds.height / 2)
-            tf = tf.scaledBy(x: layer.bounds.width / CGFloat((sb.points.count) / 2), y: (layer.bounds.height / 2) * yScale)
-            
+            tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
+
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 path.addLines(between: sb.points, transform: tf)
                 path.closeSubpath()
@@ -301,6 +300,7 @@ extension WaveformViewLayerDelegate {
     
 }
 
+
 /*
  // Affine transform code
  var tf = CGAffineTransform.identity
@@ -309,7 +309,11 @@ extension WaveformViewLayerDelegate {
  tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
 
  //
- 
+ var tf = CGAffineTransform.identity
+ let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+ tf = tf.translatedBy(x: 0.5, y: layer.bounds.height / 2)
+ tf = tf.scaledBy(x: layer.bounds.width / CGFloat((sb.points.count) / 2), y: (layer.bounds.height / 2) * yScale)
+
  
  
  

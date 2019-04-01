@@ -57,6 +57,7 @@ class SampleBuffer: NSObject {
 
 class AtomicUInt32 {
     private let _atomQ = DispatchQueue(label: "aq")
+    private let _sema = DispatchSemaphore(value: 1)
     private var _value:UInt32 = 0
     
     init(_ newValue:UInt32) {
@@ -70,15 +71,24 @@ class AtomicUInt32 {
     }
     
     func mutate(to newValue:UInt32) {
-        _atomQ.sync {
-            _value = newValue
-        }
+        _sema.wait()
+        _value = newValue
+        _sema.signal()
+//        _atomQ.sync {
+//            _value = newValue
+//        }
     }
     
     func increment(by newValue:UInt32) {
-        _atomQ.sync {
-            _value += newValue
-        }
+//        let start = CACurrentMediaTime()
+        _sema.wait()
+//        print("In sema")
+        _value += newValue
+        _sema.signal()
+//        print("Sema done: \(CACurrentMediaTime() - start)")
+//        _atomQ.sync {
+//            _value += newValue
+//        }
     }
 }
 
