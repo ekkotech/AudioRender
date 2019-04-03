@@ -19,22 +19,20 @@ enum DsStrategy:String {
     case avgValue       = "Average Value"
     case sampleValue    = "Sample Value"
 }
-let strategy:DsStrategy = .maxValue
+let strategy:DsStrategy = .sampleValue
 
 //
 // MARK: - Accelerate Framework selection
 //
-let useAccelForDs           = true
-let useAccelForMerge        = true
-let useAccelForPeakCalc     = true
-let useAccelForBuildPoints  = true
+let useAccelForDs           = false
+let useAccelForMerge        = false
+let useAccelForPeakCalc     = false
+let useAccelForBuildPoints  = false
 
 //
 // Multi-reader
 //
-let useMultiReader          = true
-// Make sure that the block size is an integer multiple of default downsample factor
-// Ideally, both should be powers of 2
+let useMultiReader          = false
 let kBlockSize                  = AVAudioFrameCount(524288)     // 2**19
 let kNumReaders                 = 2
 
@@ -320,12 +318,12 @@ class Sampler: NSObject {
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
                 leftMaxValue = 0.0
                 rightMaxValue = 0.0
-                for jdx in 0..<Int(dsFactor) {
-                    if abs(fcd[0][(idx * Int(dsFactor)) + jdx]) > leftMaxValue {
-                        leftMaxValue = abs(fcd[0][(idx * Int(dsFactor)) + jdx])
+                for jdx in 0..<dsFactor {
+                    if abs(fcd[0][(idx * dsFactor) + jdx]) > leftMaxValue {
+                        leftMaxValue = abs(fcd[0][(idx * dsFactor) + jdx])
                     }
-                    if abs(fcd[1][(idx * Int(dsFactor)) + jdx]) > rightMaxValue {
-                        rightMaxValue = abs(fcd[1][(idx * Int(dsFactor)) + jdx])
+                    if abs(fcd[1][(idx * dsFactor) + jdx]) > rightMaxValue {
+                        rightMaxValue = abs(fcd[1][(idx * dsFactor) + jdx])
                     }
                 }
                 fsd[0][idx] = leftMaxValue
@@ -345,12 +343,12 @@ class Sampler: NSObject {
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
                 leftMaxValue = 0.0
                 rightMinValue = 0.0
-                for jdx in 0..<Int(dsFactor) {
-                    if fcd[0][(idx * Int(dsFactor)) + jdx] > leftMaxValue {
-                        leftMaxValue = fcd[0][(idx * Int(dsFactor)) + jdx]
+                for jdx in 0..<dsFactor {
+                    if fcd[0][(idx * dsFactor) + jdx] > leftMaxValue {
+                        leftMaxValue = fcd[0][(idx * dsFactor) + jdx]
                     }
-                    if fcd[1][(idx * Int(dsFactor)) + jdx] < rightMinValue {
-                        rightMinValue = fcd[1][(idx * Int(dsFactor)) + jdx]
+                    if fcd[1][(idx * dsFactor) + jdx] < rightMinValue {
+                        rightMinValue = fcd[1][(idx * dsFactor) + jdx]
                     }
                 }
                 fsd[0][idx] = leftMaxValue
@@ -367,9 +365,9 @@ class Sampler: NSObject {
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
                 leftAvgValue = 0.0
                 rightAvgValue = 0.0
-                for jdx in 0..<Int(dsFactor) {
-                    leftAvgValue += abs(fcd[0][(idx * Int(dsFactor)) + jdx])
-                    rightAvgValue += abs(fcd[1][(idx * Int(dsFactor)) + jdx])
+                for jdx in 0..<dsFactor {
+                    leftAvgValue += abs(fcd[0][(idx * dsFactor) + jdx])
+                    rightAvgValue += abs(fcd[1][(idx * dsFactor) + jdx])
                 }
                 fsd[0][idx] = leftAvgValue / Float(dsFactor)
                 fsd[1][idx] = rightAvgValue / Float(dsFactor)
@@ -381,8 +379,8 @@ class Sampler: NSObject {
             }
         case (.sampleValue, false):
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {
-                fsd[0][idx] = abs(fcd[0][idx * Int(dsFactor)])
-                fsd[1][idx] = abs(fcd[1][idx * Int(dsFactor)])
+                fsd[0][idx] = abs(fcd[0][idx * dsFactor])
+                fsd[1][idx] = abs(fcd[1][idx * dsFactor])
             }
         case (.sampleValue, true):
             for idx in 0..<Int(frameBuffer.frameLength / UInt32(dsFactor)) {

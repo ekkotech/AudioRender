@@ -56,7 +56,6 @@ class SampleBuffer: NSObject {
 }
 
 class AtomicUInt32 {
-    private let _atomQ = DispatchQueue(label: "aq")
     private let _sema = DispatchSemaphore(value: 1)
     private var _value:UInt32 = 0
     
