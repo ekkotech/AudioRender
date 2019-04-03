@@ -190,7 +190,8 @@ class RootViewController: UIViewController, UITableViewDelegate, UITableViewData
     private func setupAudioSession() {
         
         do {
-            try AVAudioSessionPatch.setSession(audioSession, category: .playback)
+            try audioSession.setCategory(.playback)
+//            try AVAudioSessionPatch.setSession(audioSession, category: .playback)     // Fixed in 4.2 と想います
             systemSampleRate = audioSession.sampleRate
             processingFormat = AVAudioFormat(standardFormatWithSampleRate: audioSession.sampleRate, channels: channelMode.rawValue)
         }

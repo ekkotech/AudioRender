@@ -19,7 +19,7 @@ enum DsStrategy:String {
     case avgValue       = "Average Value"
     case sampleValue    = "Sample Value"
 }
-let strategy:DsStrategy = .sampleValue
+let strategy:DsStrategy = .maxValue
 
 //
 // MARK: - Accelerate Framework selection
