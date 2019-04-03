@@ -13,16 +13,16 @@ let kScrollerStatsIdx   = 1
 class Statistics {
     
     enum TimeCategories:String, CaseIterable {
-        case fileread = "fileread"
-        case total = "total"
-        case downsample = "downsample"
-        case merge = "merge"
-        case peakcalc = "peakcalc"
-        case buildpoints = "buildpoints"
-        case buildpath = "buildpath"
-        case transform = "transform"
-        case draw = "draw"
-        case render = "render"
+        case fileread       = "fileread"
+        case total          = "total"
+        case downsample     = "downsample"
+        case merge          = "merge"
+        case peakcalc       = "peakcalc"
+        case buildpoints    = "buildpoints"
+        case buildpath      = "buildpath"
+        case transform      = "transform"
+        case draw           = "draw"
+        case render         = "render"
     }
     
     private var title:String = ""
