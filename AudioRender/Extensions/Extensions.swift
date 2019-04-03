@@ -34,20 +34,3 @@ extension CGAffineTransform {
     
 }
 
-@discardableResult
-func measure<A>(name: String = "", _ block: () -> A) -> A {
-    let startTime = CACurrentMediaTime()
-    let result = block()
-    let timeElapsed = CACurrentMediaTime() - startTime
-    print("Duration: \(name) - \(timeElapsed)")
-    return result
-}
-
-@discardableResult
-func timing<T>(index:Int, key:String, comment:String, stats:Statistics, _ block: () -> T) -> T {
-    let startTime = CACurrentMediaTime()
-    let result = block()
-    let endTime = CACurrentMediaTime()
-    stats.setTimeParameter(index: index, key: key, timing: (comment: comment, start: startTime, end: endTime))
-    return result
-}
