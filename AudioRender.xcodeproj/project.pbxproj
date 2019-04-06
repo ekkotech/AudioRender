@@ -36,8 +36,6 @@
 		D14FB32622377BB10042C4B3 /* Able Mable (LP Version).wav in Resources */ = {isa = PBXBuildFile; fileRef = D14FB31E22377BB10042C4B3 /* Able Mable (LP Version).wav */; };
 		D14FB32822377BDA0042C4B3 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB32722377BDA0042C4B3 /* Logger.swift */; };
 		D14FB32922377BDA0042C4B3 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB32722377BDA0042C4B3 /* Logger.swift */; };
-		D14FB32C22377C3D0042C4B3 /* AudioSessionPatch.m in Sources */ = {isa = PBXBuildFile; fileRef = D14FB32B22377C3D0042C4B3 /* AudioSessionPatch.m */; };
-		D14FB32D22377C3D0042C4B3 /* AudioSessionPatch.m in Sources */ = {isa = PBXBuildFile; fileRef = D14FB32B22377C3D0042C4B3 /* AudioSessionPatch.m */; };
 		D14FB33122377D160042C4B3 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB33022377D160042C4B3 /* Protocols.swift */; };
 		D14FB33222377D160042C4B3 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB33022377D160042C4B3 /* Protocols.swift */; };
 		D14FB33422377D3D0042C4B3 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14FB33322377D3D0042C4B3 /* Extensions.swift */; };
@@ -100,10 +98,6 @@
 		D14FB31D22377BB00042C4B3 /* Aaya Lolo-48-WAV.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Aaya Lolo-48-WAV.wav"; sourceTree = "<group>"; };
 		D14FB31E22377BB10042C4B3 /* Able Mable (LP Version).wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = "Able Mable (LP Version).wav"; sourceTree = "<group>"; };
 		D14FB32722377BDA0042C4B3 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
-		D14FB32A22377C0A0042C4B3 /* AudioSessionPatch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AudioSessionPatch.h; sourceTree = "<group>"; };
-		D14FB32B22377C3D0042C4B3 /* AudioSessionPatch.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AudioSessionPatch.m; sourceTree = "<group>"; };
-		D14FB32E22377CB40042C4B3 /* AudioRender-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AudioRender-Bridging-Header.h"; sourceTree = "<group>"; };
-		D14FB32F22377CE70042C4B3 /* AudioRenderTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AudioRenderTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		D14FB33022377D160042C4B3 /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		D14FB33322377D3D0042C4B3 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		D14FB33722377D770042C4B3 /* SampleBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleBuffer.swift; sourceTree = "<group>"; };
@@ -218,10 +212,6 @@
 			isa = PBXGroup;
 			children = (
 				D14FB32722377BDA0042C4B3 /* Logger.swift */,
-				D14FB32A22377C0A0042C4B3 /* AudioSessionPatch.h */,
-				D14FB32B22377C3D0042C4B3 /* AudioSessionPatch.m */,
-				D14FB32E22377CB40042C4B3 /* AudioRender-Bridging-Header.h */,
-				D14FB32F22377CE70042C4B3 /* AudioRenderTests-Bridging-Header.h */,
 				D14FB33D22377DC50042C4B3 /* Signal.swift */,
 				D16B76552238B24D00953FC7 /* Statistics.swift */,
 			);
@@ -418,7 +408,6 @@
 				D14FB33822377D770042C4B3 /* SampleBuffer.swift in Sources */,
 				D14FB31822377B6E0042C4B3 /* WaveformViewContainer.swift in Sources */,
 				D14FB30D22377A790042C4B3 /* AppConstants.swift in Sources */,
-				D14FB32C22377C3D0042C4B3 /* AudioSessionPatch.m in Sources */,
 				D14FB30F22377ABE0042C4B3 /* ScrollerView.swift in Sources */,
 				D14FB33122377D160042C4B3 /* Protocols.swift in Sources */,
 				D14FB2DA223779000042C4B3 /* AppDelegate.swift in Sources */,
@@ -439,7 +428,6 @@
 				D14FB33F22377DC50042C4B3 /* Signal.swift in Sources */,
 				D14FB33522377D3D0042C4B3 /* Extensions.swift in Sources */,
 				D14FB32922377BDA0042C4B3 /* Logger.swift in Sources */,
-				D14FB32D22377C3D0042C4B3 /* AudioSessionPatch.m in Sources */,
 				D14FB34422377EEC0042C4B3 /* RootViewController.swift in Sources */,
 				D16B76572238B24D00953FC7 /* Statistics.swift in Sources */,
 				D14FB31022377ABE0042C4B3 /* ScrollerView.swift in Sources */,

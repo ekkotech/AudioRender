@@ -33,8 +33,8 @@ let useAccelForBuildPoints  = false
 // Multi-reader
 //
 let useMultiReader          = false
-let kBlockSize                  = AVAudioFrameCount(524288)     // 2**19
-let kNumReaders                 = 2
+let kBlockSize              = AVAudioFrameCount(524288)     // 2**19
+let kNumReaders             = 2
 
 class Sampler: NSObject {
     

@@ -37,19 +37,19 @@ let kLayerIndexCursor       = 2
 
 let kLineWidth              = CGFloat(1.0)
 let kCursorLineWidth        = kLineWidth
-let kWaveformYScale         = CGFloat(0.9)
+let kWaveformMaxYScale      = CGFloat(0.9)
 
 //
 // Rendering control
 //
 enum RenderConfig:String {
-    case lines          = "Lines"       // Individual lines inserted into pth, scale on-the-fly
+    case lines          = "Lines"       // Individual lines inserted into path, scale on-the-fly
     case linkLines      = "Link Lines"  // Joined lines inserted into path, scale on-the-fly
     case fill           = "Fill"        // Outline inserted into path, scaled by transform and filled
     case mask           = "Mask"        // Outline inserted into path, scaled by transform and masked
 }
 
-let renderConfig:RenderConfig   = .lines
+let renderConfig:RenderConfig   = .fill
 let shouldNormalise             = false
 
 class WaveformView: UIView {
@@ -184,7 +184,7 @@ extension WaveformViewLayerDelegate {
 
         let index = pv is SliderView ? 0 : 1
         let path = CGMutablePath()
-        let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+        let yScale = shouldNormalise ? (kWaveformMaxYScale / CGFloat(sb.peak)) : kWaveformMaxYScale
         let tf = CGAffineTransform.init(offsetX: CGFloat(0.5),
                                         offsetY: layer.bounds.height / 2,
                                         scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
@@ -220,7 +220,7 @@ extension WaveformViewLayerDelegate {
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 let yTranslation:CGFloat = layer.bounds.height / 2
                 let xScale = layer.bounds.size.width / CGFloat(sb.frameLength.value)
-                let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformYScale
+                let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformMaxYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformMaxYScale
                 
                 for idx in 0..<sb.points.count / 2 {
                     let xScaled = CGFloat(xScale * CGFloat(idx))
@@ -243,7 +243,7 @@ extension WaveformViewLayerDelegate {
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 let yTranslation:CGFloat = layer.bounds.height / 2
                 let xScale = layer.bounds.size.width / CGFloat(sb.frameLength.value)
-                let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformYScale
+                let yScale = shouldNormalise ? (layer.bounds.size.height / 2) * (kWaveformMaxYScale / CGFloat(sb.peak)) : (layer.bounds.size.height / 2) * kWaveformMaxYScale
                 path.move(to: CGPoint(x: 0.0, y: yTranslation))
                 for idx in 0..<sb.points.count / 2 {
                     let xScaled = CGFloat(xScale * CGFloat(idx))
@@ -270,10 +270,7 @@ extension WaveformViewLayerDelegate {
             //
             // Add CGAffineTransform code here
             //
-            var tf = CGAffineTransform.identity
-            let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
-            tf = tf.translatedBy(x: 0.5, y: layer.bounds.height / 2)
-            tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
+            let tf = CGAffineTransform.identity
 
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 path.addLines(between: sb.points, transform: tf)
@@ -303,11 +300,9 @@ extension WaveformViewLayerDelegate {
 
 /*
  // Affine transform code
- var tf = CGAffineTransform.identity
- let yScale = shouldNormalise ? (kWaveformYScale / CGFloat(sb.peak)) : kWaveformYScale
+ let yScale = shouldNormalise ? (kWaveformMaxYScale / CGFloat(sb.peak)) : kWaveformMaxYScale
  tf = tf.translatedBy(x: 0.5, y: layer.bounds.height / 2)
  tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
-
 
  
  
