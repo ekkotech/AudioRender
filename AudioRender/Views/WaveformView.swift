@@ -49,7 +49,7 @@ enum RenderConfig:String {
     case mask           = "Mask"        // Outline inserted into path, scaled by transform and masked
 }
 
-let renderConfig:RenderConfig   = .fill
+let renderConfig:RenderConfig   = .lines
 let shouldNormalise             = false
 
 class WaveformView: UIView {
@@ -185,7 +185,7 @@ extension WaveformViewLayerDelegate {
         let index = pv is SliderView ? 0 : 1
         let path = CGMutablePath()
         let yScale = shouldNormalise ? (kWaveformMaxYScale / CGFloat(sb.peak)) : kWaveformMaxYScale
-        let tf = CGAffineTransform.init(offsetX: CGFloat(0.5),
+        let tf = CGAffineTransform.init(offsetX: 0.0,
                                         offsetY: layer.bounds.height / 2,
                                         scaleX: layer.bounds.width / CGFloat(sb.points.count / 2),
                                         scaleY: (layer.bounds.height / 2) * yScale)
@@ -270,7 +270,10 @@ extension WaveformViewLayerDelegate {
             //
             // Add CGAffineTransform code here
             //
-            let tf = CGAffineTransform.identity
+            var tf = CGAffineTransform.identity
+            let yScale = shouldNormalise ? kWaveformMaxYScale / CGFloat(sb.peak) : kWaveformMaxYScale
+            tf = tf.translatedBy(x: 0.0, y: layer.bounds.height / 2)
+            tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
 
             timing(index: index, key: "buildpath", comment: "", stats: timeStats) {
                 path.addLines(between: sb.points, transform: tf)
@@ -301,7 +304,7 @@ extension WaveformViewLayerDelegate {
 /*
  // Affine transform code
  let yScale = shouldNormalise ? (kWaveformMaxYScale / CGFloat(sb.peak)) : kWaveformMaxYScale
- tf = tf.translatedBy(x: 0.5, y: layer.bounds.height / 2)
+ tf = tf.translatedBy(x: 0.0, y: layer.bounds.height / 2)
  tf = tf.scaledBy(x: layer.bounds.width / CGFloat(sb.points.count / 2), y: (layer.bounds.height / 2) * yScale)
 
  
